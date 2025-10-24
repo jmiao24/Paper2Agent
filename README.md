@@ -254,6 +254,9 @@ Use Scanpy MCP to preprocess and cluster the single-cell dataset pbmc_all.h5ad.
 * Scanpy: https://Paper2Agent-scanpy-mcp.hf.space
 * TISSUE: https://Paper2Agent-tissue-mcp.hf.space
 
+## 📊 AlphaGenome Agent Benchmarking
+For comprehensive benchmarking results and evaluation metrics of the AlphaGenome Agent, please refer to our dedicated benchmarking repository: [Paper2AgentBench](https://github.com/joed3/Paper2AgentBench). This repository contains our benchmarking tools and evaluation metrics for the AlphaGenome Agent compared to the Claude + Repo and Biomni agents.
+
 ## 📚 Citation
 ```
 @misc{miao2025paper2agent,

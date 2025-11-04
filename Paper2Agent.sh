@@ -4,7 +4,7 @@ set -euo pipefail
 # Verbose progress functions
 VERBOSE=${VERBOSE:-1}
 START_TIME=$(date +%s)
-TOTAL_STEPS=9  # 6 main steps + 4 substeps
+TOTAL_STEPS=10  # 6 main steps + 4 substeps + 1 coverage step
 
 log_progress() {
     local step_num=$1
@@ -152,7 +152,7 @@ else
 fi
 
 # 5: Core Paper2Agent pipeline steps
-for i in 1 2 3 4; do
+for i in 1 2 3 4 5; do
   OUT="$MAIN_DIR/claude_outputs/step${i}_output.json"
   MARK="$MAIN_DIR/.pipeline/05_step${i}_done"
 
@@ -162,6 +162,7 @@ for i in 1 2 3 4; do
     2) STEP_NAME="Execute tutorial notebooks" ;;
     3) STEP_NAME="Extract tools from tutorials" ;;
     4) STEP_NAME="Wrap tools in MCP server" ;;
+    5) STEP_NAME="Generate code coverage & quality reports" ;;
   esac
 
   if [[ -f "$MARK" ]]; then
@@ -174,6 +175,7 @@ for i in 1 2 3 4; do
       2) bash $SCRIPT_DIR/scripts/05_run_step2_execute_tutorials.sh    "$SCRIPT_DIR" "$MAIN_DIR" "$API_KEY" ;;
       3) bash $SCRIPT_DIR/scripts/05_run_step3_extract_tools.sh    "$SCRIPT_DIR" "$MAIN_DIR" "$API_KEY" ;;
       4) bash $SCRIPT_DIR/scripts/05_run_step4_wrap_mcp.sh    "$SCRIPT_DIR" "$MAIN_DIR" ;;
+      5) bash $SCRIPT_DIR/scripts/05_run_step5_generate_coverage.sh "$SCRIPT_DIR" "$MAIN_DIR" "$repo_name" ;;
     esac
     log_progress $((4+i)) "$STEP_NAME" "complete"
     STEP_STATUS["step${i}"]="executed"
@@ -182,12 +184,12 @@ done
 
 # 6. Launch MCP
 if [[ -f "$MAIN_DIR/.pipeline/06_mcp_done" ]]; then
-  log_progress 9 "Launch MCP server" "skip"
+  log_progress 10 "Launch MCP server" "skip"
   STEP_STATUS[mcp]="skipped"
 else
-  log_progress 9 "Launch MCP server" "start"
+  log_progress 10 "Launch MCP server" "start"
   bash $SCRIPT_DIR/scripts/06_launch_mcp.sh "$MAIN_DIR" "$repo_name"
-  log_progress 9 "Launch MCP server" "complete"
+  log_progress 10 "Launch MCP server" "complete"
   STEP_STATUS[mcp]="executed"
 fi
 
@@ -202,12 +204,13 @@ printf "02 Clone repository: %s\n" "${STEP_STATUS[clone]:-not run}" >&2
 printf "03 Prepare folders: %s\n" "${STEP_STATUS[folders]:-not run}" >&2
 printf "04 Add context MCP: %s\n" "${STEP_STATUS[context7]:-not run}" >&2
 
-for i in 1 2 3 4; do
+for i in 1 2 3 4 5; do
   case $i in
     1) STEP_DESC="Setup env & scan" ;;
     2) STEP_DESC="Execute tutorials" ;;
     3) STEP_DESC="Extract tools" ;;
     4) STEP_DESC="Wrap MCP server" ;;
+    5) STEP_DESC="Generate coverage & quality" ;;
   esac
   printf "05.%d %s: %s\n" "$i" "$STEP_DESC" "${STEP_STATUS["step${i}"]:-not run}" >&2
 done

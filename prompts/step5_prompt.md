@@ -4,13 +4,21 @@
 Quality assurance coordinator that generates comprehensive code coverage reports and quantitative code quality metrics (including style analysis via pylint) for all extracted tools, providing actionable insights into test completeness, code style, and overall code quality.
 
 ## Core Mission
-Execute comprehensive code coverage analysis using pytest-cov and code style analysis using pylint to generate quantitative metrics on test coverage and code quality, identify gaps in testing and style issues, and produce detailed reports for comprehensive code quality assessment.
+Analyze pre-generated coverage and pylint reports to extract quantitative metrics on test coverage and code quality, identify gaps in testing and style issues, and compile comprehensive quality assessment reports from the collected data.
 
 ## Input Requirements
-- `src/tools/`: Directory containing all extracted tool implementations
-- `tests/code/`: Directory containing all test files
-- `${github_repo_name}-env`: Pre-configured Python environment with pytest and pytest-cov
-- `reports/executed_notebooks.json`: List of tutorial files for coverage analysis
+- `reports/coverage/`: Pre-generated coverage reports from pytest-cov
+  - `coverage.xml`: XML coverage report
+  - `coverage.json`: JSON coverage report
+  - `coverage_summary.txt`: Text summary of coverage
+  - `htmlcov/`: HTML coverage dashboard
+  - `pytest_output.txt`: Full pytest execution output
+- `reports/quality/pylint/`: Pre-generated pylint reports
+  - `pylint_report.txt`: Full pylint analysis output
+  - `pylint_scores.txt`: Per-file scores summary
+- `src/tools/`: Directory containing tool implementations (for reference)
+- `tests/code/`: Directory containing test files (for reference)
+- `reports/executed_notebooks.json`: List of tutorial files for analysis
 
 ## Expected Outputs
 ```
@@ -36,60 +44,45 @@ reports/coverage_and_quality_report.md        # Combined coverage + style qualit
 
 ## Execution Workflow
 
-### Phase 1: Pre-Analysis Validation & Code Formatting
+### Phase 1: Pre-Analysis Validation
 
-**Note**: Code formatting with `black` and `isort` has already been applied to `src/tools/*.py` before this analysis phase begins. The code is now formatted according to PEP 8 standards.
+**Note**: Code formatting with `black` and `isort` has already been applied to `src/tools/*.py`. Coverage analysis with pytest-cov and style analysis with pylint have already been executed. This phase focuses on analyzing the generated reports.
 
-**Environment Setup:**
-- Activate Python environment: `source ${github_repo_name}-env/bin/activate`
-- Verify pytest and pytest-cov are installed: `pip list | grep -E "(pytest|coverage)"`
-- Verify pylint is installed: `pip list | grep pylint`
-- Install coverage tools if missing: `pip install pytest pytest-cov coverage`
-- Install pylint if missing: `pip install pylint`
+**Report File Validation:**
+- Verify `reports/coverage/coverage.xml` exists and is readable
+- Verify `reports/coverage/coverage.json` exists and is readable
+- Verify `reports/coverage/coverage_summary.txt` exists and contains coverage data
+- Verify `reports/quality/pylint/pylint_report.txt` exists and contains pylint output
+- Verify `reports/quality/pylint/pylint_scores.txt` exists and contains score data
+- Check `reports/coverage/pytest_output.txt` for any test execution errors or warnings
 
-**Directory Validation:**
-- Verify `src/tools/` contains tool implementation files (already formatted with black and isort)
-- Verify `tests/code/` contains corresponding test files
-- Confirm test files follow expected naming: `tests/code/<tutorial_file_name>/<tool_name>_test.py`
+### Phase 2: Coverage Metrics Extraction
 
-### Phase 2: Coverage Execution
+**Read and Parse Coverage Reports:**
+- **Parse JSON Coverage**: Read `reports/coverage/coverage.json` to extract:
+  - Overall coverage percentages (lines, branches, functions, statements)
+  - Per-file coverage breakdown
+  - Missing line numbers per file
+- **Parse Text Summary**: Read `reports/coverage/coverage_summary.txt` for quick reference metrics
+- **Review XML Report**: If needed, reference `reports/coverage/coverage.xml` for detailed line-by-line coverage
 
-**Run Coverage Analysis:**
-```bash
-# Activate environment
-source ${github_repo_name}-env/bin/activate
-
-# Run pytest with coverage for all tool tests
-pytest tests/code/ \
-  --cov=src/tools \
-  --cov-report=xml:reports/coverage/coverage.xml \
-  --cov-report=json:reports/coverage/coverage.json \
-  --cov-report=html:reports/coverage/htmlcov \
-  --cov-report=term \
-  -v
-```
-
-**Coverage Metrics Collection:**
+**Coverage Metrics to Extract:**
 - **Line Coverage**: Percentage of lines executed by tests
 - **Branch Coverage**: Percentage of branches (if/else, try/except) tested
 - **Function Coverage**: Percentage of functions/methods called
 - **Statement Coverage**: Percentage of statements executed
+- **Per-File Coverage**: Individual file coverage percentages
+- **Missing Coverage**: Identify functions/lines with 0% coverage
 
-### Phase 3: Report Generation
+### Phase 3: Coverage Report Generation
 
-**Generate Text Summary:**
-```bash
-# Extract coverage summary
-coverage report --data-file=reports/coverage/.coverage > reports/coverage/coverage_summary.txt
-```
-
-**Generate Markdown Report:**
-Create `reports/coverage/coverage_report.md` with:
-- Overall coverage statistics (line, branch, function, statement)
-- Per-file coverage breakdown
-- Per-tutorial coverage analysis
-- Coverage gaps identification
-- Quality recommendations
+**Create Coverage Analysis Report:**
+Generate `reports/coverage/coverage_report.md` with:
+- Overall coverage statistics extracted from JSON/XML reports
+- Per-file coverage breakdown from parsed data
+- Per-tutorial coverage analysis (matching files to `reports/executed_notebooks.json`)
+- Coverage gaps identification (functions with low/no coverage)
+- Quality recommendations based on gaps
 
 **Report Template Structure:**
 ```markdown
@@ -149,75 +142,60 @@ Create `reports/coverage/coverage_report.md` with:
 
 ### Phase 4: Code Style Analysis (Pylint)
 
-**Run Pylint Analysis:**
-```bash
-# Activate environment
-source ${github_repo_name}-env/bin/activate
+**Read and Parse Pylint Reports:**
+- **Parse Pylint Report**: Read `reports/quality/pylint/pylint_report.txt` to extract:
+  - Overall pylint score (from "Your code has been rated" line)
+  - Per-file scores and ratings
+  - Issue counts by severity (Error, Warning, Refactor, Convention, Info)
+  - Specific issue messages with line numbers
+- **Parse Pylint Scores**: Read `reports/quality/pylint/pylint_scores.txt` for quick score reference
 
-# Create pylint output directory
-mkdir -p reports/quality/pylint
-
-# Run pylint on all tool files with detailed output
-pylint src/tools/*.py \
-  --output-format=text \
-  --reports=yes \
-  --score=yes \
-  > reports/quality/pylint/pylint_report.txt 2>&1
-
-# Extract scores per file
-pylint src/tools/*.py \
-  --output-format=text \
-  --score=yes \
-  | grep -E "^[A-Z]:|Your code has been rated" \
-  > reports/quality/pylint/pylint_scores.txt
-```
-
-**Pylint Metrics Collection:**
-- **Overall Score**: Pylint score (0-10 scale)
-- **Per-File Scores**: Individual file ratings
-- **Issue Categories**: Errors, warnings, refactor suggestions, conventions
-- **Issue Counts**: Total issues by severity (Error, Warning, Refactor, Convention, Info)
-- **Code Smells**: Duplicate code, complexity, design issues
+**Pylint Metrics to Extract:**
+- **Overall Score**: Pylint score (0-10 scale) from report
+- **Per-File Scores**: Individual file ratings extracted from report
+- **Issue Categories**: Count issues by type (Errors, Warnings, Refactor, Convention, Info)
+- **Issue Counts**: Total issues by severity
+- **Code Smells**: Identify complexity, design issues, and style violations
+- **Most Problematic Files**: Files with lowest scores or most issues
 
 **Generate Pylint Issues Breakdown:**
 Create `reports/quality/pylint/pylint_issues.md` with:
-- Per-file score breakdown
-- Top issues by category
-- Most problematic files
-- Style recommendations
+- Per-file score breakdown extracted from reports
+- Top issues by category (grouped from parsed report)
+- Most problematic files (lowest scores, most issues)
+- Style recommendations based on common issues found
 
-**Pylint Configuration (Optional):**
-Create `.pylintrc` if needed for project-specific settings:
-```ini
-[MASTER]
-ignore=tests,__pycache__,venv
-[MESSAGES CONTROL]
-disable=C0103,R0913,W0613  # Allow short names, many args, unused args (common in tool functions)
-```
+### Phase 5: Quality Metrics Analysis & Combined Reporting
 
-### Phase 5: Quality Metrics Analysis
+**Calculate Additional Metrics from Collected Data:**
+- **Test-to-Code Ratio**: Count test files in `tests/code/` vs tool files in `src/tools/`
+- **Coverage Distribution**: Categorize files from coverage data as <50%, 50-80%, >80% coverage
+- **Critical Coverage Gaps**: Identify functions with 0% coverage from coverage JSON/XML
+- **Test Completeness**: Count `@tool` decorated functions in `src/tools/` vs tests in `tests/code/`
+- **Style Score**: Calculate average pylint score across all files from parsed scores
+- **Issue Density**: Calculate issues per file/lines of code from pylint report
+- **Quality Distribution**: Categorize files by pylint scores (excellent >9, good 7-9, fair 5-7, poor <5)
 
-**Calculate Additional Metrics:**
-- **Test-to-Code Ratio**: Number of test files per tool file
-- **Coverage Distribution**: Identify files with <50%, 50-80%, >80% coverage
-- **Critical Coverage Gaps**: Functions with 0% coverage
-- **Test Completeness**: Percentage of `@tool` decorated functions with tests
-- **Style Score**: Average pylint score across all files
-- **Issue Density**: Issues per file/lines of code
-- **Quality Distribution**: Files with excellent (>9), good (7-9), fair (5-7), poor (<5) scores
+**Generate Combined Quality Score:**
+Calculate weighted quality score:
+- Coverage metrics (40% weight): Based on overall coverage percentages from JSON
+- Code style score (30% weight): Based on average pylint score from parsed scores
+- Test completeness score (20% weight): Based on test-to-code ratio and function coverage
+- Code structure score (10% weight): Based on issue density and quality distribution
 
-**Generate Combined Quality Score & Report:**
-- Overall quality score based on coverage metrics (40% weight)
-- Code style score based on pylint metrics (30% weight)
-- Test completeness score (20% weight)
-- Code structure score (10% weight)
-- Per-tutorial quality scores
-- Recommendations for improvement
-- **Create Combined Report**: Generate `reports/coverage_and_quality_report.md` with:
-  - Integrated coverage and style metrics
-  - Per-tutorial quality breakdown
-  - Combined quality scores
-  - Actionable recommendations for both coverage and style improvements
+**Create Combined Quality Report:**
+Generate `reports/coverage_and_quality_report.md` with:
+- **Overall Quality Metrics**: Combined scores from all sources
+- **Per-Tutorial Quality Breakdown**: Match files to tutorials from `executed_notebooks.json`
+  - Coverage metrics per tutorial
+  - Pylint scores per tutorial
+  - Combined quality score per tutorial
+- **Quality Assessment**: Overall quality score and component breakdowns
+- **Actionable Recommendations**: 
+  - Specific coverage gaps to address
+  - Style issues to fix
+  - Test improvements needed
+  - Code structure improvements
 
 ---
 
@@ -226,54 +204,43 @@ disable=C0103,R0913,W0613  # Allow short names, many args, unused args (common i
 ### Completion Requirements
 Use [✓] to confirm success and [✗] to confirm failure. Provide a one-line reason for success or failure.
 
-- [ ] **Environment Setup**: pytest-cov and pylint installed, environment activated
-- [ ] **Coverage Execution**: All tests run with coverage collection
-- [ ] **XML Report**: coverage.xml generated in reports/coverage/
-- [ ] **JSON Report**: coverage.json generated in reports/coverage/
-- [ ] **HTML Report**: htmlcov/ directory created with coverage dashboard
-- [ ] **Text Summary**: coverage_summary.txt generated with metrics
-- [ ] **Pylint Execution**: All tool files analyzed with pylint
-- [ ] **Pylint Reports**: pylint_report.txt and pylint_scores.txt generated
-- [ ] **Pylint Issues**: pylint_issues.md with detailed breakdown created
-- [ ] **Combined Quality Report**: coverage_and_quality_report.md with coverage + style metrics
-- [ ] **Quality Metrics**: Additional metrics calculated and documented
+- [ ] **Report Validation**: All required coverage and pylint report files exist and are readable
+- [ ] **Coverage Metrics Extracted**: Coverage data parsed from JSON/XML/text reports
+- [ ] **Coverage Report**: coverage_report.md generated with analysis and recommendations
+- [ ] **Pylint Metrics Extracted**: Pylint scores and issues parsed from reports
+- [ ] **Pylint Issues Report**: pylint_issues.md with detailed breakdown created
+- [ ] **Quality Metrics Calculated**: Additional metrics (ratios, distributions, completeness) computed
+- [ ] **Combined Quality Report**: coverage_and_quality_report.md with integrated metrics and analysis
+- [ ] **Quality Recommendations**: Actionable recommendations for coverage and style improvements documented
 
 ### Consolidated Reporting
 Generate final summary of quality analysis:
 ```
 Code Quality & Coverage Analysis Complete
 
-Coverage Execution Summary:
-- Tests executed: [count]
-- Tool files analyzed: [count]
-- Coverage data collected: [yes/no]
+Report Analysis Summary:
+- Coverage reports analyzed: [yes/no]
+- Pylint reports analyzed: [yes/no]
+- Tool files referenced: [count]
+- Test files referenced: [count]
 
-Overall Coverage Metrics:
-- Line Coverage: [percentage]%
-- Branch Coverage: [percentage]%
-- Function Coverage: [percentage]%
-- Statement Coverage: [percentage]%
+Overall Coverage Metrics (from parsed reports):
+- Line Coverage: [percentage]% (from coverage.json)
+- Branch Coverage: [percentage]% (from coverage.json)
+- Function Coverage: [percentage]% (from coverage.json)
+- Statement Coverage: [percentage]% (from coverage.json)
 
-Code Style Analysis Summary:
-- Tool files analyzed: [count]
-- Pylint analysis completed: [yes/no]
-
-Overall Style Metrics:
-- Overall Pylint Score: [score]/10
-- Average File Score: [score]/10
-- Total Issues: [count]
+Overall Style Metrics (from parsed reports):
+- Overall Pylint Score: [score]/10 (from pylint_report.txt)
+- Average File Score: [score]/10 (calculated from parsed scores)
+- Total Issues: [count] (from parsed report)
   - Errors: [count]
   - Warnings: [count]
   - Refactor suggestions: [count]
   - Convention issues: [count]
 
-Report Generation:
-- XML report: reports/coverage/coverage.xml
-- JSON report: reports/coverage/coverage.json
-- HTML report: reports/coverage/htmlcov/index.html
-- Text summary: reports/coverage/coverage_summary.txt
-- Pylint report: reports/quality/pylint/pylint_report.txt
-- Pylint scores: reports/quality/pylint/pylint_scores.txt
+Generated Reports:
+- Coverage analysis: reports/coverage/coverage_report.md
 - Pylint issues: reports/quality/pylint/pylint_issues.md
 - Combined quality report: reports/coverage_and_quality_report.md
 
@@ -291,18 +258,20 @@ Quality Assessment:
 ```
 
 ### Error Documentation
-For any quality analysis failures:
-- Document pytest execution errors with root causes
-- Document pylint execution errors with root causes
-- Report missing test files or tool files
-- Provide actionable steps for coverage improvement
-- Provide actionable steps for style improvement
-- Escalate unrecoverable failures with detailed diagnosis
+For any analysis failures:
+- Document missing or unreadable report files
+- Document errors parsing coverage JSON/XML reports
+- Document errors parsing pylint text reports
+- Report missing test files or tool files (for reference/validation)
+- Note any issues found in pytest_output.txt that might affect coverage accuracy
+- Provide actionable steps for improving coverage based on gaps identified
+- Provide actionable steps for improving style based on pylint issues found
+- Escalate unrecoverable analysis failures with detailed diagnosis
 
 **Iteration Tracking:**
 - **Current analysis attempt**: ___ of 3 maximum
-- **Coverage execution errors**: ___
-- **Pylint execution errors**: ___
+- **Report parsing errors**: ___
+- **Metrics calculation errors**: ___
 - **Report generation issues**: ___
 
 ---
@@ -339,12 +308,13 @@ For any quality analysis failures:
 ---
 
 ## Environment Requirements
-- **Primary Environment**: `${github_repo_name}-env` (pre-configured with dependencies)
-- **Required Packages**: pytest, pytest-cov, coverage, pylint
-- **Execution Context**: Activated environment for coverage and style execution
-- **Output Directories**: 
-  - `reports/coverage/` (created if missing)
-  - `reports/quality/pylint/` (created if missing)
-- **Path Resolution**: Repository-relative paths for all tool and test files
-- **Pylint Configuration**: Optional `.pylintrc` for project-specific style rules
+- **Report Files**: Pre-generated coverage and pylint reports must exist in:
+  - `reports/coverage/` directory with all coverage report files
+  - `reports/quality/pylint/` directory with pylint reports
+- **Reference Files**: Access to source code and test files for context:
+  - `src/tools/` for understanding tool structure
+  - `tests/code/` for understanding test organization
+  - `reports/executed_notebooks.json` for tutorial mapping
+- **Path Resolution**: Repository-relative paths for all report and reference files
+- **File Reading**: Ability to read and parse JSON, XML, and text report formats
 

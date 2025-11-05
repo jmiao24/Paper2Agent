@@ -29,14 +29,16 @@ reports/quality/
   │   ├── pylint_report.json                 # JSON output (if available)
   │   ├── pylint_scores.txt                  # Per-file scores summary
   │   └── pylint_issues.md                   # Detailed issues breakdown
-  └── quality_report.md                      # Combined coverage + style quality report
+reports/coverage_and_quality_report.md        # Combined coverage + style quality report
 ```
 
 ---
 
 ## Execution Workflow
 
-### Phase 1: Pre-Analysis Validation
+### Phase 1: Pre-Analysis Validation & Code Formatting
+
+**Note**: Code formatting with `black` and `isort` has already been applied to `src/tools/*.py` before this analysis phase begins. The code is now formatted according to PEP 8 standards.
 
 **Environment Setup:**
 - Activate Python environment: `source ${github_repo_name}-env/bin/activate`
@@ -46,7 +48,7 @@ reports/quality/
 - Install pylint if missing: `pip install pylint`
 
 **Directory Validation:**
-- Verify `src/tools/` contains tool implementation files
+- Verify `src/tools/` contains tool implementation files (already formatted with black and isort)
 - Verify `tests/code/` contains corresponding test files
 - Confirm test files follow expected naming: `tests/code/<tutorial_file_name>/<tool_name>_test.py`
 
@@ -204,13 +206,18 @@ disable=C0103,R0913,W0613  # Allow short names, many args, unused args (common i
 - **Issue Density**: Issues per file/lines of code
 - **Quality Distribution**: Files with excellent (>9), good (7-9), fair (5-7), poor (<5) scores
 
-**Generate Combined Quality Score:**
+**Generate Combined Quality Score & Report:**
 - Overall quality score based on coverage metrics (40% weight)
 - Code style score based on pylint metrics (30% weight)
 - Test completeness score (20% weight)
 - Code structure score (10% weight)
 - Per-tutorial quality scores
 - Recommendations for improvement
+- **Create Combined Report**: Generate `reports/coverage_and_quality_report.md` with:
+  - Integrated coverage and style metrics
+  - Per-tutorial quality breakdown
+  - Combined quality scores
+  - Actionable recommendations for both coverage and style improvements
 
 ---
 
@@ -228,7 +235,7 @@ Use [✓] to confirm success and [✗] to confirm failure. Provide a one-line re
 - [ ] **Pylint Execution**: All tool files analyzed with pylint
 - [ ] **Pylint Reports**: pylint_report.txt and pylint_scores.txt generated
 - [ ] **Pylint Issues**: pylint_issues.md with detailed breakdown created
-- [ ] **Combined Quality Report**: quality_report.md with coverage + style metrics
+- [ ] **Combined Quality Report**: coverage_and_quality_report.md with coverage + style metrics
 - [ ] **Quality Metrics**: Additional metrics calculated and documented
 
 ### Consolidated Reporting
@@ -268,7 +275,7 @@ Report Generation:
 - Pylint report: reports/quality/pylint/pylint_report.txt
 - Pylint scores: reports/quality/pylint/pylint_scores.txt
 - Pylint issues: reports/quality/pylint/pylint_issues.md
-- Combined quality report: reports/quality/quality_report.md
+- Combined quality report: reports/coverage_and_quality_report.md
 
 Quality Assessment:
 - Overall Quality Score: [score]/100

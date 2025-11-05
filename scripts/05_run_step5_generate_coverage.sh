@@ -24,6 +24,46 @@ if [[ -f "$MARKER" ]]; then
   exit 0
 fi
 
+# Activate environment and install formatting tools
+ENV_PATH="$MAIN_DIR/${repo_name}-env"
+if [[ ! -d "$ENV_PATH" ]]; then
+  echo "Error: Environment not found at $ENV_PATH" >&2
+  exit 1
+fi
+
+source "$ENV_PATH/bin/activate"
+
+# Install black and isort if not already installed
+echo "05: Installing/verifying black and isort..." >&2
+pip install -q black isort || {
+  echo "Error: Failed to install black or isort" >&2
+  exit 1
+}
+
+# Format code with black and isort before analysis
+TOOLS_DIR="$MAIN_DIR/src/tools"
+if [[ -d "$TOOLS_DIR" ]]; then
+  # Use find to safely handle cases with no .py files
+  mapfile -t PY_FILES < <(find "$TOOLS_DIR" -maxdepth 1 -name "*.py" -type f 2>/dev/null)
+  if [[ ${#PY_FILES[@]} -gt 0 ]]; then
+    echo "05: Running black on src/tools/*.py..." >&2
+    black "${PY_FILES[@]}" 2>&1 | sed 's/^/  /' >&2 || {
+      echo "Warning: black encountered errors (continuing anyway)" >&2
+    }
+    
+    echo "05: Running isort on src/tools/*.py..." >&2
+    isort "${PY_FILES[@]}" 2>&1 | sed 's/^/  /' >&2 || {
+      echo "Warning: isort encountered errors (continuing anyway)" >&2
+    }
+    
+    echo "05: Code formatting complete" >&2
+  else
+    echo "05: Warning: No Python files found in src/tools/, skipping formatting" >&2
+  fi
+else
+  echo "05: Warning: src/tools/ directory not found, skipping formatting" >&2
+fi
+
 # Export repo_name for envsubst substitution
 export github_repo_name="$repo_name"
 

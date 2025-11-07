@@ -193,12 +193,26 @@ After completion, your project will contain:
 │   ├── step1_output.json           # Tutorial scanner results
 │   ├── step2_output.json           # Tutorial executor results
 │   ├── step3_output.json           # Tool extraction results
-│   └── step4_output.json           # MCP server creation results
+│   ├── step4_output.json           # MCP server creation results
+│   └── step5_output.json           # Coverage and quality analysis results
 ├── reports/
 │   ├── tutorial-scanner.json       # Tutorial discovery analysis
 │   ├── tutorial-scanner-include-in-tools.json  # Tools inclusion decisions
 │   ├── executed_notebooks.json     # Notebook execution summary
-│   └── environment-manager_results.md  # Environment setup details
+│   ├── environment-manager_results.md  # Environment setup details
+│   ├── coverage/                   # Code coverage analysis reports
+│   │   ├── coverage.xml            # XML coverage report (CI/CD format)
+│   │   ├── coverage.json           # JSON coverage report (machine-readable)
+│   │   ├── coverage_summary.txt     # Text summary of coverage metrics
+│   │   ├── coverage_report.md       # Detailed markdown coverage analysis
+│   │   ├── pytest_output.txt       # Full pytest execution output
+│   │   └── htmlcov/                # HTML coverage dashboard (interactive)
+│   ├── quality/                    # Code quality analysis reports
+│   │   └── pylint/                 # Pylint code style analysis
+│   │       ├── pylint_report.txt   # Full pylint analysis output
+│   │       ├── pylint_scores.txt   # Per-file pylint scores summary
+│   │       └── pylint_issues.md    # Detailed style issues breakdown
+│   └── coverage_and_quality_report.md  # Combined coverage + quality report
 ├── tests/
 │   ├── code/<tutorial_file_name>/       # Test code for extracted tools
 │   ├── data/<tutorial_file_name>/       # Test data files
@@ -218,6 +232,9 @@ After completion, your project will contain:
 | `src/<repo_name>_mcp.py` | Main MCP server file that Claude Code loads |
 | `src/tools/<tutorial_file_name>.py` | Individual tool modules extracted from each tutorial |
 | `<repo_name>-env/` | Isolated Python environment with all dependencies |
+| `reports/coverage/` | Code coverage analysis reports (pytest-cov) |
+| `reports/quality/pylint/` | Code style analysis reports (pylint) |
+| `reports/coverage_and_quality_report.md` | Combined coverage + quality metrics report |
 
 ## 🎬 Demos
 Below, we showcase demos of AI agents created by Paper2Agent, illustrating how each agent applies the tools from its source paper to tackle scientific tasks.

@@ -20,6 +20,9 @@ For each question, you must provide:
 2.  **Tool-Solvable**: The question must be answerable using *only* the provided tools. If the notebook does something complex that isn't exposed as a tool, do not ask about it.
 3.  **Objective**: Avoid subjective questions like "Interpret the plot". Prefer "What is the accuracy score?" or "How many clusters were found?".
 4.  **Self-Contained**: The question should be understandable without seeing the notebook.
+5.  **Context-Rich**:
+    - **Data Context**: Explicitly state what data is being used (e.g., "using the 'pbmc3k' dataset loaded in the tutorial").
+    - **Parameter Context**: Mention specific parameter settings if they affect the result (e.g., "with n_neighbors=10" or "using default parameters").
 
 ## Output Format
 Return a JSON object with a list of questions:
@@ -29,7 +32,7 @@ Return a JSON object with a list of questions:
     {
       "tutorial_id": "tutorial_file_name",
       "tutorial_path": "notebooks/tutorial_file_name.ipynb",
-      "question": "What is the final accuracy of the model on the test set?",
+      "question": "What is the final accuracy of the model on the test set using the default hyperparameters?",
       "ground_truth": "0.945",
       "cell_id": 15,
       "answer_type": "numeric"

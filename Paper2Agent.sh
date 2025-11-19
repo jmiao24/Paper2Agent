@@ -4,7 +4,7 @@ set -euo pipefail
 # Verbose progress functions
 VERBOSE=${VERBOSE:-1}
 START_TIME=$(date +%s)
-TOTAL_STEPS=10  # 6 main steps + 4 substeps + 1 coverage step
+TOTAL_STEPS=11  # 6 main steps + 5 substeps + 1 coverage step
 
 log_progress() {
     local step_num=$1
@@ -152,7 +152,7 @@ else
 fi
 
 # 5: Core Paper2Agent pipeline steps
-for i in 1 2 3 4 5; do
+for i in 1 2 3 4 5 6 7; do
   OUT="$MAIN_DIR/claude_outputs/step${i}_output.json"
   MARK="$MAIN_DIR/.pipeline/05_step${i}_done"
 
@@ -163,6 +163,8 @@ for i in 1 2 3 4 5; do
     3) STEP_NAME="Extract tools from tutorials" ;;
     4) STEP_NAME="Wrap tools in MCP server" ;;
     5) STEP_NAME="Generate code coverage & quality reports" ;;
+    6) STEP_NAME="Extract benchmark questions" ;;
+    7) STEP_NAME="Run benchmark assessment" ;;
   esac
 
   if [[ -f "$MARK" ]]; then
@@ -176,6 +178,8 @@ for i in 1 2 3 4 5; do
       3) bash $SCRIPT_DIR/scripts/05_run_step3_extract_tools.sh    "$SCRIPT_DIR" "$MAIN_DIR" "$API_KEY" ;;
       4) bash $SCRIPT_DIR/scripts/05_run_step4_wrap_mcp.sh    "$SCRIPT_DIR" "$MAIN_DIR" ;;
       5) bash $SCRIPT_DIR/scripts/05_run_step5_generate_coverage.sh "$SCRIPT_DIR" "$MAIN_DIR" "$repo_name" ;;
+      6) bash $SCRIPT_DIR/scripts/05_run_step6_extract_benchmarks.sh "$SCRIPT_DIR" "$MAIN_DIR" "$repo_name" ;;
+      7) bash $SCRIPT_DIR/scripts/05_run_step7_benchmark_assessment.sh "$SCRIPT_DIR" "$MAIN_DIR" "$repo_name" ;;
     esac
     log_progress $((4+i)) "$STEP_NAME" "complete"
     STEP_STATUS["step${i}"]="executed"
@@ -204,13 +208,15 @@ printf "02 Clone repository: %s\n" "${STEP_STATUS[clone]:-not run}" >&2
 printf "03 Prepare folders: %s\n" "${STEP_STATUS[folders]:-not run}" >&2
 printf "04 Add context MCP: %s\n" "${STEP_STATUS[context7]:-not run}" >&2
 
-for i in 1 2 3 4 5; do
+for i in 1 2 3 4 5 6 7; do
   case $i in
     1) STEP_DESC="Setup env & scan" ;;
     2) STEP_DESC="Execute tutorials" ;;
     3) STEP_DESC="Extract tools" ;;
     4) STEP_DESC="Wrap MCP server" ;;
     5) STEP_DESC="Generate coverage & quality" ;;
+    6) STEP_DESC="Extract benchmarks" ;;
+    7) STEP_DESC="Run assessment" ;;
   esac
   printf "05.%d %s: %s\n" "$i" "$STEP_DESC" "${STEP_STATUS["step${i}"]:-not run}" >&2
 done

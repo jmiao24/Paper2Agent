@@ -22,6 +22,8 @@ import {
   PAPER2AGENT_ROOT,
 } from './utils.js';
 import type { Paper2AgentConfig } from './types.js';
+import { generateRubricArtifacts } from './rubric-architect.js';
+import type { RubricGenerationRequest } from './rubric-types.js';
 
 const server = new Server(
   {
@@ -113,6 +115,45 @@ const tools: Tool[] = [
         },
       },
       required: ['project_dir'],
+    },
+  },
+  {
+    name: 'generate_llm_rubric',
+    description: 'Generate a complete LLM-Rubric evaluation pipeline for a phenomenon. Creates JSON schema, Python runtime, dashboard specs, and prompt templates based on Perspectivist Safety methodology.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        phenomenon: {
+          type: 'string',
+          description: 'The specific phenomenon to measure (e.g., "cultural_condescension", "safety_risk")',
+        },
+        insider_profile: {
+          type: 'object',
+          description: 'Profile of the insider perspective (region, culture, domain, notes)',
+          properties: {
+            region: { type: 'string' },
+            culture: { type: 'string' },
+            domain: { type: 'string' },
+            notes: { type: 'string' },
+          },
+        },
+        include_python: {
+          type: 'boolean',
+          description: 'Generate Python runtime code',
+          default: true,
+        },
+        include_dashboard_spec: {
+          type: 'boolean',
+          description: 'Generate dashboard specification',
+          default: true,
+        },
+        include_prompt_template: {
+          type: 'boolean',
+          description: 'Generate LLM prompt template',
+          default: true,
+        },
+      },
+      required: ['phenomenon'],
     },
   },
 ];
@@ -310,6 +351,43 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                     : `Failed to launch agent: ${result.stderr}`,
                   output: result.stdout,
                   error: result.stderr,
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
+      case 'generate_llm_rubric': {
+        if (!args || typeof args !== 'object') {
+          throw new Error('Invalid arguments');
+        }
+        const request = args as unknown as RubricGenerationRequest;
+
+        // Set defaults
+        if (request.include_python === undefined) request.include_python = true;
+        if (request.include_dashboard_spec === undefined) request.include_dashboard_spec = true;
+        if (request.include_prompt_template === undefined) request.include_prompt_template = true;
+
+        const artifacts = generateRubricArtifacts(request);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  success: true,
+                  phenomenon: request.phenomenon,
+                  artifacts: {
+                    schema: artifacts.schema,
+                    python_available: !!artifacts.python_runtime,
+                    dashboard_available: !!artifacts.dashboard_spec,
+                    prompt_available: !!artifacts.prompt_template,
+                  },
+                  full_output: artifacts,
                 },
                 null,
                 2

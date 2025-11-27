@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "paper2agent": {
+      "command": "node",
+      "args": [
+        "/home/user/Paper2Agent/mcp-server/dist/index.js"
+      ],
+      "description": "Paper2Agent MCP - Create AI agents from research papers"
+    }
+  }
+}

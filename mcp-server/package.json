@@ -1,0 +1,33 @@
+{
+  "name": "paper2agent-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol server for Paper2Agent - create AI agents from research papers",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "paper2agent-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "prepare": "npm run build",
+    "dev": "tsx src/index.ts"
+  },
+  "keywords": [
+    "mcp",
+    "paper2agent",
+    "ai",
+    "research",
+    "agent"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

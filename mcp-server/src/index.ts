@@ -26,6 +26,14 @@ import { generateRubricArtifacts } from './rubric-architect.js';
 import type { RubricGenerationRequest } from './rubric-types.js';
 import { createExperimentalDesignerPrompts, generateExperimentalDesignReport } from './experimental-designer.js';
 import type { ExperimentalDesignerRequest } from './experimental-designer-types.js';
+import {
+  generateGrantBudget,
+  generateInvestorBudget,
+  generateBudgetComparison,
+  generateBudgetGuidance,
+  calculateROIProjection,
+} from './budget-agent.js';
+import type { BudgetAnalysisRequest } from './budget-agent-types.js';
 
 const server = new Server(
   {
@@ -187,6 +195,50 @@ const tools: Tool[] = [
         },
       },
       required: ['research_text'],
+    },
+  },
+  {
+    name: 'analyze_research_budget',
+    description: 'Analyze and generate research budgets for AI/ML projects. Supports grant proposals and investor decks with detailed cost breakdowns, ROI projections, and best practices guidance.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        research_description: {
+          type: 'string',
+          description: 'Description of the research project',
+        },
+        audience: {
+          type: 'string',
+          enum: ['grant', 'investor'],
+          description: 'Target audience for the budget',
+        },
+        research_type: {
+          type: 'string',
+          enum: ['academic', 'corporate', 'startup', 'nonprofit'],
+          description: 'Type of research organization',
+        },
+        funding_agency: {
+          type: 'string',
+          enum: ['NIH', 'NSF', 'DARPA', 'DOE', 'VC', 'angel', 'internal', 'other'],
+          description: 'Funding source',
+        },
+        project_duration_years: {
+          type: 'number',
+          description: 'Project duration in years',
+          default: 3,
+        },
+        estimated_team_size: {
+          type: 'number',
+          description: 'Estimated research team size',
+          default: 3,
+        },
+        generate_comparison: {
+          type: 'boolean',
+          description: 'Generate both grant and investor versions for comparison',
+          default: false,
+        },
+      },
+      required: ['research_description', 'audience'],
     },
   },
 ];
@@ -477,6 +529,68 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             },
           ],
         };
+      }
+
+      case 'analyze_research_budget': {
+        if (!args || typeof args !== 'object') {
+          throw new Error('Invalid arguments');
+        }
+        const request = args as unknown as BudgetAnalysisRequest;
+
+        // Set defaults
+        if (!request.project_duration_years) request.project_duration_years = 3;
+        if (!request.estimated_team_size) request.estimated_team_size = 3;
+
+        let result;
+
+        if (request.generate_comparison) {
+          // Generate both grant and investor budgets
+          result = generateBudgetComparison(request);
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(
+                  {
+                    success: true,
+                    message: 'Generated budget comparison for grant and investor audiences',
+                    comparison: result,
+                    guidance: generateBudgetGuidance('both'),
+                  },
+                  null,
+                  2
+                ),
+              },
+            ],
+          };
+        } else {
+          // Generate single budget based on audience
+          const budget = request.audience === 'grant'
+            ? generateGrantBudget(request)
+            : generateInvestorBudget(request);
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(
+                  {
+                    success: true,
+                    message: `Generated ${request.audience} budget for AI/ML research project`,
+                    budget,
+                    guidance: generateBudgetGuidance(request.audience),
+                    roi_note: request.audience === 'investor'
+                      ? 'Use calculateROIProjection for service-based business models'
+                      : null,
+                  },
+                  null,
+                  2
+                ),
+              },
+            ],
+          };
+        }
       }
 
       default:

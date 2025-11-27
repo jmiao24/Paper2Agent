@@ -34,6 +34,9 @@ import {
   calculateROIProjection,
 } from './budget-agent.js';
 import type { BudgetAnalysisRequest } from './budget-agent-types.js';
+import { generateComptrollerNotebook, COMPTROLLER_AGENT_CARD } from './comptroller-agent.js';
+import { generateAdministratorNotebook, ADMINISTRATOR_AGENT_CARD } from './administrator-agent.js';
+import type { ComptrollerRequest, AdministratorRequest } from './operations-agents-types.js';
 
 const server = new Server(
   {
@@ -239,6 +242,63 @@ const tools: Tool[] = [
         },
       },
       required: ['research_description', 'audience'],
+    },
+  },
+  {
+    name: 'generate_comptroller_notebook',
+    description: 'Generate a Google Colab notebook for The Comptroller - COO Algorithm for resource optimization. Implements Iron Triangle optimization (Speed ⟷ Cost ⟷ Quality) with constraint programming, market search, and burn rate analysis. A2A protocol compliant.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        total_budget_cap: {
+          type: 'number',
+          description: 'Total budget cap in dollars',
+        },
+        hard_deadline: {
+          type: 'string',
+          description: 'Hard deadline in ISO format (e.g., "2025-12-31")',
+        },
+        primary_resource_sink: {
+          type: 'string',
+          enum: ['compute', 'labor', 'data', 'licenses'],
+          description: 'Primary resource constraint',
+        },
+        team_size: {
+          type: 'number',
+          description: 'Number of team members',
+          default: 3,
+        },
+      },
+      required: ['total_budget_cap', 'hard_deadline', 'primary_resource_sink'],
+    },
+  },
+  {
+    name: 'generate_administrator_notebook',
+    description: 'Generate a Google Colab notebook for The Administrator - Governance Architect. Synthesizes organizational structures, optimizes distributed team communication across timezones, generates SOPs, and creates constitutional frameworks. A2A protocol compliant.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        team_size: {
+          type: 'number',
+          description: 'Total team size',
+        },
+        domain: {
+          type: 'string',
+          enum: ['ai_research', 'ml_engineering', 'data_science', 'interdisciplinary'],
+          description: 'Primary research domain',
+        },
+        distributed_locations: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'List of team member locations (city, country)',
+        },
+        regulatory_constraints: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Regulatory requirements (e.g., GDPR, HIPAA, IRB)',
+        },
+      },
+      required: ['team_size', 'domain'],
     },
   },
 ];
@@ -591,6 +651,88 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             ],
           };
         }
+      }
+
+      case 'generate_comptroller_notebook': {
+        if (!args || typeof args !== 'object') {
+          throw new Error('Invalid arguments');
+        }
+        const request = args as unknown as ComptrollerRequest;
+
+        // Set defaults
+        if (!request.team_size) request.team_size = 3;
+
+        const notebook = generateComptrollerNotebook(request);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  success: true,
+                  message: 'Generated Comptroller notebook for resource optimization',
+                  agent_card: COMPTROLLER_AGENT_CARD,
+                  notebook_structure: {
+                    total_cells: notebook.cells.length,
+                    blocks: [
+                      '1. Resource Ingestion (The Ledger)',
+                      '2. The Solver (Constraint Programming)',
+                      '3. The Scavenger (Market Search)',
+                      '4. The Forensics (Burn Rate Analysis)',
+                      '5. The War Room (Visualizations)',
+                    ],
+                  },
+                  notebook: notebook,
+                  usage: 'Upload this notebook to Google Colab to execute resource optimization',
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
+      case 'generate_administrator_notebook': {
+        if (!args || typeof args !== 'object') {
+          throw new Error('Invalid arguments');
+        }
+        const request = args as unknown as AdministratorRequest;
+
+        // Set defaults
+        if (!request.distributed_locations) request.distributed_locations = [];
+        if (!request.regulatory_constraints) request.regulatory_constraints = [];
+
+        const notebook = generateAdministratorNotebook(request);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  success: true,
+                  message: 'Generated Administrator notebook for governance and org design',
+                  agent_card: ADMINISTRATOR_AGENT_CARD,
+                  notebook_structure: {
+                    total_cells: notebook.cells.length,
+                    blocks: [
+                      '1. Org Structure Synthesis',
+                      '2. The Foreign Office (Timezone Optimization)',
+                      '3. The SOP Factory (Governance Templates)',
+                      '4. The Constitution (Authorship & Disputes)',
+                    ],
+                  },
+                  notebook: notebook,
+                  usage: 'Upload this notebook to Google Colab to design organizational governance',
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
       }
 
       default:

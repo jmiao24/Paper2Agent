@@ -37,6 +37,8 @@ import type { BudgetAnalysisRequest } from './budget-agent-types.js';
 import { generateComptrollerNotebook, COMPTROLLER_AGENT_CARD } from './comptroller-agent.js';
 import { generateAdministratorNotebook, ADMINISTRATOR_AGENT_CARD } from './administrator-agent.js';
 import type { ComptrollerRequest, AdministratorRequest } from './operations-agents-types.js';
+import { generateMLflowAgentOutput, MLFLOW_AGENT_CARD, MLFLOW_FIELD_PATTERNS } from './mlflow-agent.js';
+import type { MLflowAgentRequest } from './mlflow-agent-types.js';
 
 const server = new Server(
   {
@@ -299,6 +301,56 @@ const tools: Tool[] = [
         },
       },
       required: ['team_size', 'domain'],
+    },
+  },
+  {
+    name: 'generate_mlflow_query_plan',
+    description: 'Generate an optimized MLflow MCP query plan for experiment tracking and trace management. Translates natural language tasks into MLflow API calls with field selection and filtering strategies. Supports debugging, performance analysis, evaluation workflows, and data cleanup.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        tracking_uri: {
+          type: 'string',
+          description: 'MLflow tracking server URI (e.g., http://localhost:5000, databricks, sqlite:///mlflow.db)',
+        },
+        experiment_name: {
+          type: 'string',
+          description: 'Name or ID of the MLflow experiment',
+        },
+        task_description: {
+          type: 'string',
+          description: 'Natural language description of the task (e.g., "Find all failed traces", "Analyze slow traces", "Log feedback scores")',
+        },
+        field_selection: {
+          type: 'string',
+          description: 'Optional comma-separated field paths to extract (e.g., "info.trace_id,data.spans.*.name")',
+        },
+        filters: {
+          type: 'object',
+          description: 'Optional filters for trace search',
+          properties: {
+            trace_state: {
+              type: 'string',
+              enum: ['OK', 'ERROR', 'IN_PROGRESS'],
+            },
+            execution_duration: {
+              type: 'object',
+              properties: {
+                min_ms: { type: 'number' },
+                max_ms: { type: 'number' },
+              },
+            },
+            time_range: {
+              type: 'object',
+              properties: {
+                start_timestamp_ms: { type: 'number' },
+                end_timestamp_ms: { type: 'number' },
+              },
+            },
+          },
+        },
+      },
+      required: ['tracking_uri', 'experiment_name', 'task_description'],
     },
   },
 ];
@@ -726,6 +778,41 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   },
                   notebook: notebook,
                   usage: 'Upload this notebook to Google Colab to design organizational governance',
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
+      case 'generate_mlflow_query_plan': {
+        if (!args || typeof args !== 'object') {
+          throw new Error('Invalid arguments');
+        }
+        const request = args as unknown as MLflowAgentRequest;
+
+        const output = generateMLflowAgentOutput(request);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  success: true,
+                  message: 'Generated MLflow MCP query plan',
+                  agent_card: MLFLOW_AGENT_CARD,
+                  task: output.query_plan.task,
+                  suggested_tools: output.query_plan.suggested_tools,
+                  field_selection: output.query_plan.field_selection_strategy,
+                  filter_strategy: output.query_plan.filter_strategy,
+                  workflow_steps: output.query_plan.workflow_steps,
+                  connection_config: output.connection_config,
+                  example_code: output.example_code,
+                  best_practices: output.best_practices,
+                  field_patterns_reference: MLFLOW_FIELD_PATTERNS,
                 },
                 null,
                 2

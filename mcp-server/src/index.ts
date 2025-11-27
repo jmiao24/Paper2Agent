@@ -41,6 +41,8 @@ import { generateMLflowAgentOutput, MLFLOW_AGENT_CARD, MLFLOW_FIELD_PATTERNS } f
 import type { MLflowAgentRequest } from './mlflow-agent-types.js';
 import { generateDatasetBuilderOutput, DATASET_BUILDER_AGENT_CARD } from './dataset-builder.js';
 import type { DatasetBuilderRequest } from './dataset-builder-types.js';
+import { generateCISONotebook, CISO_AGENT_CARD } from './ciso-agent.js';
+import type { CISORequest } from './ciso-agent-types.js';
 
 const server = new Server(
   {
@@ -419,6 +421,83 @@ const tools: Tool[] = [
         },
       },
       required: ['dataset_type', 'input_format', 'output_formats'],
+    },
+  },
+  {
+    name: 'generate_ciso_notebook',
+    description: 'Generate a Google Colab notebook for The CISO - Chief Information Security Officer. Operates on Zero Trust model with Security by Design and Safety by Design principles. Includes threat modeling (STRIDE), incident response protocols, cryptographic hygiene, and social engineering defense. A2A protocol compliant.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        high_value_assets: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              category: {
+                type: 'string',
+                enum: ['data', 'infrastructure', 'intellectual_property', 'credentials'],
+              },
+              sensitivity: {
+                type: 'string',
+                enum: ['public', 'internal', 'confidential', 'restricted'],
+              },
+              description: { type: 'string' },
+            },
+            required: ['name', 'category', 'sensitivity'],
+          },
+          description: 'High value assets to protect',
+        },
+        attack_surfaces: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              type: {
+                type: 'string',
+                enum: ['network', 'application', 'human', 'physical', 'supply_chain'],
+              },
+              exposure: {
+                type: 'string',
+                enum: ['internet_facing', 'internal', 'partner_access', 'remote_workforce'],
+              },
+              description: { type: 'string' },
+            },
+            required: ['name', 'type', 'exposure'],
+          },
+          description: 'Attack surfaces to monitor',
+        },
+        threat_model: {
+          type: 'array',
+          items: {
+            type: 'string',
+            enum: ['nation_state', 'ransomware_gang', 'script_kiddie', 'insider_threat', 'supply_chain'],
+          },
+          description: 'Threat actors to model',
+        },
+        operational_mode: {
+          type: 'string',
+          enum: ['preventative', 'active_crisis', 'post_incident'],
+          description: 'Current security posture',
+        },
+        regulatory_requirements: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Compliance requirements (e.g., HIPAA, GDPR, SOC2)',
+        },
+        team_size: {
+          type: 'number',
+          description: 'Security team size',
+        },
+        budget_constraint: {
+          type: 'string',
+          enum: ['startup', 'enterprise', 'government'],
+          description: 'Budget tier for security operations',
+        },
+      },
+      required: ['high_value_assets', 'attack_surfaces', 'threat_model', 'operational_mode'],
     },
   },
 ];
@@ -914,6 +993,46 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   data_statistics: output.data_statistics,
                   best_practices: output.best_practices,
                   warnings: output.warnings,
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
+      case 'generate_ciso_notebook': {
+        if (!args || typeof args !== 'object') {
+          throw new Error('Invalid arguments');
+        }
+        const request = args as unknown as CISORequest;
+
+        const notebook = generateCISONotebook(request);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  success: true,
+                  message: 'Generated CISO notebook for security operations',
+                  agent_card: CISO_AGENT_CARD,
+                  notebook_structure: {
+                    total_cells: notebook.cells.length,
+                    blocks: [
+                      '1. Threat Modeling (STRIDE Risk Matrix)',
+                      '2. The Panic Button (Incident Response)',
+                      '3. The Vault (Cryptography & Secrets)',
+                      '4. Social Engineering Defense (Human Firewall)',
+                    ],
+                  },
+                  zero_trust_mode: notebook.zero_trust_mode,
+                  operational_mode: request.operational_mode,
+                  threat_model: request.threat_model,
+                  notebook: notebook,
+                  usage: 'Upload this notebook to Google Colab to activate Security Operations Center',
                 },
                 null,
                 2

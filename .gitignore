@@ -1,0 +1,37 @@
+# Paper2Agent generated projects (add specific projects you want to commit individually)
+*_Agent/
+
+# But allow the mcp-server to be tracked
+!mcp-server/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

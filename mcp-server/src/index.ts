@@ -24,6 +24,8 @@ import {
 import type { Paper2AgentConfig } from './types.js';
 import { generateRubricArtifacts } from './rubric-architect.js';
 import type { RubricGenerationRequest } from './rubric-types.js';
+import { createExperimentalDesignerPrompts, generateExperimentalDesignReport } from './experimental-designer.js';
+import type { ExperimentalDesignerRequest } from './experimental-designer-types.js';
 
 const server = new Server(
   {
@@ -154,6 +156,37 @@ const tools: Tool[] = [
         },
       },
       required: ['phenomenon'],
+    },
+  },
+  {
+    name: 'design_experiment',
+    description: 'Analyze a research paper and design a new experiment based on its limitations. Extracts metadata, identifies future work, designs experimental study, and creates technical implementation plan.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        research_text: {
+          type: 'string',
+          description: 'Full text of the research paper to analyze',
+        },
+        codebase_context: {
+          type: 'object',
+          description: 'Optional context about existing code',
+          properties: {
+            github_url: { type: 'string' },
+            file_list: {
+              type: 'array',
+              items: { type: 'string' },
+            },
+          },
+        },
+        mode: {
+          type: 'string',
+          enum: ['replicate', 'innovate'],
+          description: 'Whether to replicate existing methodology or innovate a new approach',
+          default: 'innovate',
+        },
+      },
+      required: ['research_text'],
     },
   },
 ];
@@ -388,6 +421,55 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                     prompt_available: !!artifacts.prompt_template,
                   },
                   full_output: artifacts,
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
+      case 'design_experiment': {
+        if (!args || typeof args !== 'object') {
+          throw new Error('Invalid arguments');
+        }
+        const request = args as unknown as ExperimentalDesignerRequest;
+
+        // Set default mode
+        if (!request.mode) {
+          request.mode = 'innovate';
+        }
+
+        // Generate the three-phase prompts
+        const prompts = createExperimentalDesignerPrompts(request);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  success: true,
+                  message: 'Generated Experimental Designer prompts for 3-phase analysis',
+                  mode: request.mode,
+                  instructions: 'Use these prompts sequentially with an LLM to complete the experimental design',
+                  prompts: {
+                    system_prompt: prompts.system,
+                    phase1_prompt: prompts.phase1,
+                    phase2_instructions: 'After Phase 1, use phase2Generator with extracted metadata and future work',
+                    phase3_instructions: 'After Phase 2, use phase3Generator with the experimental design',
+                  },
+                  workflow: [
+                    '1. Run Phase 1 prompt to extract metadata and future work',
+                    '2. Parse JSON results from Phase 1',
+                    '3. Generate Phase 2 prompt using metadata/future work',
+                    '4. Run Phase 2 to design the experiment',
+                    '5. Parse JSON results from Phase 2',
+                    '6. Generate Phase 3 prompt using experimental design',
+                    '7. Run Phase 3 to create implementation plan',
+                    '8. Compile all results into final report',
+                  ],
                 },
                 null,
                 2

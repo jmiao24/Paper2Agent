@@ -39,6 +39,8 @@ import { generateAdministratorNotebook, ADMINISTRATOR_AGENT_CARD } from './admin
 import type { ComptrollerRequest, AdministratorRequest } from './operations-agents-types.js';
 import { generateMLflowAgentOutput, MLFLOW_AGENT_CARD, MLFLOW_FIELD_PATTERNS } from './mlflow-agent.js';
 import type { MLflowAgentRequest } from './mlflow-agent-types.js';
+import { generateDatasetBuilderOutput, DATASET_BUILDER_AGENT_CARD } from './dataset-builder.js';
+import type { DatasetBuilderRequest } from './dataset-builder-types.js';
 
 const server = new Server(
   {
@@ -351,6 +353,72 @@ const tools: Tool[] = [
         },
       },
       required: ['tracking_uri', 'experiment_name', 'task_description'],
+    },
+  },
+  {
+    name: 'generate_dataset_builder_plan',
+    description: 'Generate a comprehensive plan for constructing AI/ML training datasets. Supports single-turn and multi-turn conversations with conversion to SFT, DPO, and input formats. Integrates with CollabLLM and HuggingFace ecosystems.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dataset_type: {
+          type: 'string',
+          enum: ['single_turn', 'multi_turn'],
+          description: 'Type of dataset to create',
+        },
+        input_format: {
+          type: 'string',
+          enum: ['nested', 'flat', 'huggingface'],
+          description: 'Format of input data: nested (conversations grouped with turns), flat (separated rows), or huggingface (repo name)',
+        },
+        huggingface_repo: {
+          type: 'string',
+          description: 'HuggingFace repository name (e.g., "username/dataset-name") if using huggingface input format',
+        },
+        output_formats: {
+          type: 'array',
+          items: {
+            type: 'string',
+            enum: ['sft', 'dpo', 'inputs'],
+          },
+          description: 'Desired output formats: sft (supervised fine-tuning), dpo (direct preference optimization), inputs (prompts only)',
+        },
+        config: {
+          type: 'object',
+          description: 'Configuration options for dataset construction',
+          properties: {
+            eval_ratio: {
+              type: 'number',
+              description: 'Ratio of data to use for evaluation split',
+              default: 0.1,
+            },
+            seed: {
+              type: 'number',
+              description: 'Random seed for reproducible splits',
+              default: 42,
+            },
+            add_system_prompt: {
+              type: 'boolean',
+              description: 'Whether to add system prompt to conversations',
+              default: false,
+            },
+            sft_lower_bound_metric: {
+              type: 'string',
+              description: 'Metric name for SFT quality filtering (e.g., "score", "rewards.accuracy")',
+            },
+            sft_lower_bound: {
+              type: 'number',
+              description: 'Minimum value for SFT quality metric to include example',
+            },
+            dpo_minimum_gap: {
+              type: 'number',
+              description: 'Minimum score gap between chosen and rejected responses for DPO pairs',
+              default: 0.2,
+            },
+          },
+        },
+      },
+      required: ['dataset_type', 'input_format', 'output_formats'],
     },
   },
 ];
@@ -813,6 +881,39 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   example_code: output.example_code,
                   best_practices: output.best_practices,
                   field_patterns_reference: MLFLOW_FIELD_PATTERNS,
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
+      case 'generate_dataset_builder_plan': {
+        if (!args || typeof args !== 'object') {
+          throw new Error('Invalid arguments');
+        }
+        const request = args as unknown as DatasetBuilderRequest;
+
+        const output = generateDatasetBuilderOutput(request);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  success: true,
+                  message: 'Generated dataset builder plan',
+                  agent_card: DATASET_BUILDER_AGENT_CARD,
+                  dataset_type: output.dataset_type,
+                  input_format: output.input_format,
+                  dataset_specs: output.dataset_specs,
+                  code_examples: output.code_examples,
+                  data_statistics: output.data_statistics,
+                  best_practices: output.best_practices,
+                  warnings: output.warnings,
                 },
                 null,
                 2

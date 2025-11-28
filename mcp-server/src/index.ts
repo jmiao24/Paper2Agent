@@ -43,6 +43,10 @@ import { generateDatasetBuilderOutput, DATASET_BUILDER_AGENT_CARD } from './data
 import type { DatasetBuilderRequest } from './dataset-builder-types.js';
 import { generateCISONotebook, CISO_AGENT_CARD } from './ciso-agent.js';
 import type { CISORequest } from './ciso-agent-types.js';
+import { generateOrchestratorOutput, ORCHESTRATOR_AGENT_CARD } from './orchestrator.js';
+import type { OrchestratorRequest } from './orchestrator-types.js';
+import { generateCreativeDirectorOutput, CREATIVE_DIRECTOR_AGENT_CARD } from './creative-director.js';
+import type { CreativeDirectorRequest } from './creative-director-types.js';
 
 const server = new Server(
   {
@@ -498,6 +502,181 @@ const tools: Tool[] = [
         },
       },
       required: ['high_value_assets', 'attack_surfaces', 'threat_model', 'operational_mode'],
+    },
+  },
+  {
+    name: 'analyze_swarm_and_suggest',
+    description: 'Analyze current agent swarm composition, identify capability gaps, suggest new agents, and recommend multi-agent workflows using ADK patterns (Sequential, Parallel, Loop, Coordinator). Meta-agent for swarm optimization.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        current_agents: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              type: {
+                type: 'string',
+                enum: ['llm', 'workflow', 'custom'],
+              },
+              capabilities: {
+                type: 'array',
+                items: { type: 'string' },
+              },
+              description: { type: 'string' },
+              sub_agents: {
+                type: 'array',
+                items: { type: 'string' },
+              },
+            },
+            required: ['name', 'type', 'capabilities', 'description'],
+          },
+          description: 'Current agents in the swarm',
+        },
+        project_goals: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'High-level project objectives',
+        },
+        research_domains: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Research domains of interest',
+        },
+        team_size: {
+          type: 'number',
+          description: 'Team size for resource planning',
+        },
+        optimization_focus: {
+          type: 'string',
+          enum: ['performance', 'modularity', 'maintainability', 'scalability', 'all'],
+          description: 'Primary optimization objective',
+          default: 'all',
+        },
+        analyze_gaps: {
+          type: 'boolean',
+          description: 'Perform capability gap analysis',
+          default: true,
+        },
+        suggest_workflows: {
+          type: 'boolean',
+          description: 'Suggest workflow optimizations using ADK patterns',
+          default: true,
+        },
+        suggest_hierarchy: {
+          type: 'boolean',
+          description: 'Recommend hierarchical agent structure',
+          default: true,
+        },
+      },
+      required: ['current_agents', 'project_goals', 'optimization_focus'],
+    },
+  },
+  {
+    name: 'create_design_system',
+    description: 'The Creative Director v1.2: Strategic Design Engine. Generates color palettes, typography systems, CSS frameworks, UI components, image generation prompts, brand audits, and creative strategies. Modular activation of capabilities: style_engine, interface_architect, prompt_engineer, voice, brand_auditor, strategist.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        modules: {
+          type: 'array',
+          items: {
+            type: 'string',
+            enum: ['style_engine', 'interface_architect', 'prompt_engineer', 'voice', 'brand_auditor', 'strategist'],
+          },
+          description: 'Which creative modules to activate',
+        },
+        project_name: {
+          type: 'string',
+          description: 'Name of the project/brand',
+        },
+        project_description: {
+          type: 'string',
+          description: 'Brief description of the project',
+        },
+        aesthetic: {
+          type: 'string',
+          enum: ['functional_brutalist', 'swiss_international', 'neo_memphis', 'dark_academic', 'cyber_industrial', 'minimal_scandinavian', 'custom'],
+          description: 'Design aesthetic to apply',
+          default: 'functional_brutalist',
+        },
+        custom_palette_requirements: {
+          type: 'string',
+          description: 'Custom color palette requirements (if aesthetic is "custom")',
+        },
+        ui_components: {
+          type: 'array',
+          items: {
+            type: 'string',
+            enum: ['card', 'modal', 'dashboard', 'form', 'navigation', 'data_viz', 'button', 'input'],
+          },
+          description: 'UI components to generate (for interface_architect module)',
+        },
+        accessibility_level: {
+          type: 'string',
+          enum: ['WCAG_AA', 'WCAG_AAA'],
+          description: 'Accessibility compliance level',
+          default: 'WCAG_AA',
+        },
+        image_generation_needs: {
+          type: 'object',
+          properties: {
+            model: {
+              type: 'string',
+              enum: ['midjourney', 'dalle3', 'flux', 'stable_diffusion'],
+            },
+            count: { type: 'number' },
+            use_cases: {
+              type: 'array',
+              items: { type: 'string' },
+            },
+          },
+          description: 'Image generation requirements (for prompt_engineer module)',
+        },
+        text_to_rewrite: {
+          type: 'string',
+          description: 'Text to rewrite in different voice personas (for voice module)',
+        },
+        target_persona: {
+          type: 'string',
+          enum: ['the_operator', 'the_visionary', 'the_institutional', 'the_rebel', 'the_educator'],
+          description: 'Target voice persona',
+        },
+        assets_to_audit: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              type: {
+                type: 'string',
+                enum: ['css', 'html', 'text', 'notebook'],
+              },
+              content: { type: 'string' },
+              file_path: { type: 'string' },
+            },
+          },
+          description: 'Assets to audit for brand compliance (for brand_auditor module)',
+        },
+        brand_constitution: {
+          type: 'object',
+          description: 'Brand standards to audit against (for brand_auditor module)',
+        },
+        business_goal: {
+          type: 'string',
+          description: 'Business objective (for strategist module)',
+        },
+        target_audience: {
+          type: 'string',
+          description: 'Target audience (for strategist module)',
+        },
+        constraints: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Design constraints (for strategist module)',
+        },
+      },
+      required: ['modules', 'project_name', 'project_description'],
     },
   },
 ];
@@ -1033,6 +1212,105 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   threat_model: request.threat_model,
                   notebook: notebook,
                   usage: 'Upload this notebook to Google Colab to activate Security Operations Center',
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
+      case 'analyze_swarm_and_suggest': {
+        if (!args || typeof args !== 'object') {
+          throw new Error('Invalid arguments');
+        }
+        const request = args as unknown as OrchestratorRequest;
+
+        const output = generateOrchestratorOutput(request);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  success: true,
+                  message: 'Generated swarm analysis and recommendations',
+                  agent_card: ORCHESTRATOR_AGENT_CARD,
+                  analysis: output.analysis,
+                  agent_suggestions: output.agent_suggestions,
+                  workflow_optimizations: output.workflow_optimizations,
+                  hierarchy_recommendation: output.hierarchy_recommendation,
+                  integration_guide: output.integration_guide,
+                  adk_primitives: output.adk_primitives_used,
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
+      case 'create_design_system': {
+        if (!args || typeof args !== 'object') {
+          throw new Error('Invalid arguments');
+        }
+        const request = args as unknown as CreativeDirectorRequest;
+
+        const output = generateCreativeDirectorOutput(request);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  success: true,
+                  message: 'Generated design system with Creative Director v1.2',
+                  agent_card: CREATIVE_DIRECTOR_AGENT_CARD,
+                  project_name: output.project_name,
+                  modules_activated: output.notebook.metadata.modules_used,
+                  outputs: {
+                    palette: output.palette ? {
+                      name: output.palette.name,
+                      description: output.palette.description,
+                      colors_count: Object.keys(output.palette).length,
+                    } : undefined,
+                    typography: output.typography ? {
+                      name: output.typography.name,
+                      description: output.typography.description,
+                    } : undefined,
+                    css_framework: output.css_framework ? {
+                      size: output.css_framework.length,
+                      lines: output.css_framework.split('\n').length,
+                    } : undefined,
+                    ui_components: output.ui_components?.map(c => ({
+                      name: c.name,
+                      type: c.component_type,
+                      accessibility_compliant: true,
+                    })),
+                    image_prompts: output.image_prompts?.map(p => ({
+                      use_case: p.use_case,
+                      model: p.model,
+                      has_technical_params: !!p.technical_params,
+                    })),
+                    rewritten_text_personas: output.rewritten_text ? Object.keys(output.rewritten_text) : undefined,
+                    brand_audit: output.brand_audit ? {
+                      compliance_score: output.brand_audit.compliance_score,
+                      violations_count: output.brand_audit.violations.length,
+                      summary: output.brand_audit.summary,
+                    } : undefined,
+                    creative_strategy: output.creative_strategy ? {
+                      business_goal: output.creative_strategy.business_goal,
+                      target_audience: output.creative_strategy.target_audience,
+                      aesthetic: output.creative_strategy.visual_strategy.aesthetic,
+                      voice: output.creative_strategy.messaging_strategy.voice,
+                    } : undefined,
+                  },
+                  notebook: output.notebook,
+                  usage: 'Upload this notebook to Google Colab for interactive design system exploration',
                 },
                 null,
                 2

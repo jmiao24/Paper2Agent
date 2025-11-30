@@ -47,6 +47,8 @@ import { generateOrchestratorOutput, ORCHESTRATOR_AGENT_CARD } from './orchestra
 import type { OrchestratorRequest } from './orchestrator-types.js';
 import { generateCreativeDirectorOutput, CREATIVE_DIRECTOR_AGENT_CARD } from './creative-director.js';
 import type { CreativeDirectorRequest } from './creative-director-types.js';
+import { generateVisualInspectorOutput, VISUAL_INSPECTOR_AGENT_CARD } from './visual-inspector.js';
+import type { VisualInspectorRequest } from './visual-inspector-types.js';
 
 const server = new Server(
   {
@@ -677,6 +679,110 @@ const tools: Tool[] = [
         },
       },
       required: ['modules', 'project_name', 'project_description'],
+    },
+  },
+  {
+    name: 'visualize_dataset',
+    description: 'The Visual Inspector v1.0: FiftyOne-powered dataset visualization and quality assessment. Interactive exploration, label mistake detection (mistakenness), model evaluation (mAP, PR curves), data curation (uniqueness, hardness), and annotation debugging.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        mode: {
+          type: 'string',
+          enum: ['exploration', 'quality_check', 'model_evaluation', 'data_curation', 'annotation_debug'],
+          description: 'Visualization mode to use',
+        },
+        dataset_config: {
+          type: 'object',
+          properties: {
+            dataset_name: { type: 'string' },
+            dataset_type: {
+              type: 'string',
+              enum: ['classification', 'detection', 'segmentation', 'keypoints', 'multi_label', 'video'],
+            },
+            data_source: {
+              type: 'object',
+              properties: {
+                type: {
+                  type: 'string',
+                  enum: ['local', 'huggingface', 'zoo', 'custom'],
+                },
+                path: { type: 'string' },
+                zoo_name: { type: 'string' },
+                split: { type: 'string' },
+              },
+              required: ['type'],
+            },
+            label_field: { type: 'string' },
+            prediction_field: { type: 'string' },
+          },
+          required: ['dataset_name', 'dataset_type', 'data_source'],
+        },
+        view_config: {
+          type: 'object',
+          properties: {
+            filters: { type: 'array' },
+            sort_by: {
+              type: 'object',
+              properties: {
+                field: { type: 'string' },
+                reverse: { type: 'boolean' },
+              },
+            },
+            limit: { type: 'number' },
+          },
+        },
+        evaluation_config: {
+          type: 'object',
+          properties: {
+            gt_field: { type: 'string' },
+            pred_field: { type: 'string' },
+            metrics: {
+              type: 'array',
+              items: {
+                type: 'string',
+                enum: ['mAP', 'precision_recall', 'confusion_matrix', 'f1_score', 'top_k_accuracy', 'iou', 'detection_curves'],
+              },
+            },
+            compute_mAP: { type: 'boolean' },
+            iou_threshold: { type: 'number' },
+            classwise: { type: 'boolean' },
+          },
+        },
+        brain_config: {
+          type: 'object',
+          properties: {
+            method: {
+              type: 'string',
+              enum: ['uniqueness', 'mistakenness', 'hardness', 'similarity', 'visualization'],
+            },
+            model: { type: 'string' },
+            label_field: { type: 'string' },
+            prediction_field: { type: 'string' },
+          },
+          required: ['method'],
+        },
+        quality_thresholds: {
+          type: 'object',
+          properties: {
+            mistakenness_threshold: { type: 'number' },
+            uniqueness_threshold: { type: 'number' },
+            hardness_threshold: { type: 'number' },
+            confidence_threshold: { type: 'number' },
+          },
+        },
+        export_config: {
+          type: 'object',
+          properties: {
+            export_view: { type: 'boolean' },
+            export_format: {
+              type: 'string',
+              enum: ['json', 'csv', 'coco', 'yolo', 'voc'],
+            },
+          },
+        },
+      },
+      required: ['mode', 'dataset_config'],
     },
   },
 ];
@@ -1311,6 +1417,42 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   },
                   notebook: output.notebook,
                   usage: 'Upload this notebook to Google Colab for interactive design system exploration',
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
+      case 'visualize_dataset': {
+        if (!args || typeof args !== 'object') {
+          throw new Error('Invalid arguments');
+        }
+        const request = args as unknown as VisualInspectorRequest;
+
+        const output = generateVisualInspectorOutput(request);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  success: true,
+                  message: 'Generated FiftyOne dataset visualization notebook',
+                  agent_card: VISUAL_INSPECTOR_AGENT_CARD,
+                  dataset_name: output.dataset_name,
+                  mode: output.mode,
+                  dataset_statistics: output.dataset_statistics,
+                  evaluation_results: output.evaluation_results,
+                  brain_results: output.brain_results,
+                  quality_issues: output.quality_issues,
+                  insights: output.insights,
+                  recommendations: output.recommendations,
+                  notebook: output.notebook,
+                  usage: 'Upload this notebook to Google Colab to launch interactive FiftyOne visualization',
                 },
                 null,
                 2

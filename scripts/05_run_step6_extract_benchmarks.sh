@@ -34,23 +34,24 @@ if [[ ! -f "$EXECUTED_NOTEBOOKS_JSON" ]]; then
 fi
 
 # Read executed notebooks list
-# We use jq to parse the JSON array
-tutorials=$(jq -c '.[]' "$EXECUTED_NOTEBOOKS_JSON")
+# The JSON is a dictionary: { "name": { "execution_path": "...", "http_url": "..." }, ... }
+# We use jq to extract keys and iterate
+tutorial_names=$(jq -r 'keys[]' "$EXECUTED_NOTEBOOKS_JSON")
 
 # Initialize CSV with header if it doesn't exist (handled by python script, but good to be safe)
 rm -f "$OUTPUT_CSV"
 
-for tutorial in $tutorials; do
-    # Extract fields
-    tutorial_name=$(echo "$tutorial" | jq -r '.name')
-    tutorial_path=$(echo "$tutorial" | jq -r '.path')
+for tutorial_name in $tutorial_names; do
+    # Extract fields for this tutorial
+    # We use arg --arg to pass the key safely
+    tutorial_data=$(jq -c --arg name "$tutorial_name" '.[$name]' "$EXECUTED_NOTEBOOKS_JSON")
+    
+    # execution_path is relative to MAIN_DIR usually, but let's check
+    rel_exec_path=$(echo "$tutorial_data" | jq -r '.execution_path')
+    http_url=$(echo "$tutorial_data" | jq -r '.http_url')
     
     # Construct full path to executed notebook
-    # The executed notebook is usually in notebooks/<name>/<name>_execution_final.ipynb
-    # But let's check the path from the report or standard convention
-    
-    # Standard convention from Step 2:
-    exec_nb_path="$MAIN_DIR/notebooks/${tutorial_name}/${tutorial_name}_execution_final.ipynb"
+    exec_nb_path="$MAIN_DIR/$rel_exec_path"
     
     if [[ ! -f "$exec_nb_path" ]]; then
         echo "05.6: Warning - Executed notebook not found for $tutorial_name at $exec_nb_path" >&2
@@ -84,11 +85,16 @@ for tutorial in $tutorials; do
     echo "" >> "$agent_input_file"
     echo "---" >> "$agent_input_file"
     echo "Task: Extract benchmark questions from the following notebook." >> "$agent_input_file"
+    echo "IMPORTANT: Return ONLY the JSON object. Do not include any conversational text, markdown formatting, or explanations." >> "$agent_input_file"
     echo "Tutorial Name: $tutorial_name" >> "$agent_input_file"
-    echo "Tutorial Path: $tutorial_path" >> "$agent_input_file"
+    echo "Tutorial URL: $http_url" >> "$agent_input_file"
     echo "---" >> "$agent_input_file"
+    # Preprocess the notebook to reduce size (strip images, truncate text)
+    preprocessed_nb_path="$MAIN_DIR/notebooks/${tutorial_name}/${tutorial_name}_execution_context_preprocessed.ipynb"
+    python3 "$SCRIPT_DIR/tools/preprocess_notebook.py" "$exec_nb_path" "$preprocessed_nb_path"
+    
     echo "Notebook Content:" >> "$agent_input_file"
-    cat "$exec_nb_path" >> "$agent_input_file"
+    cat "$preprocessed_nb_path" >> "$agent_input_file"
     
     # Run Claude
     # We use a large context model
@@ -99,7 +105,7 @@ for tutorial in $tutorials; do
       
     # Validate and Append to CSV
     python3 "$EXTRACTOR_SCRIPT" \
-        --notebook "$exec_nb_path" \
+        --notebook "$preprocessed_nb_path" \
         --questions "$agent_output_file" \
         --output "$OUTPUT_CSV"
         

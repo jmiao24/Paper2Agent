@@ -57,11 +57,8 @@ if [[ ! -f "$ENV_PYTHON" ]]; then
 fi
 
 # Install MCP (this registers it with `claude` CLI)
-# We assume `fastmcp` is available in the current environment or the project environment?
-# The `Paper2Agent.sh` setup should have installed `fastmcp` in the *project* environment?
-# Or is it a global tool?
-# `06_launch_mcp.sh` calls `fastmcp` directly. Assuming it's in PATH.
-fastmcp install claude-code "$TOOL_PY" --python "$ENV_PYTHON"
+# We try to install, but if it fails (e.g. already exists), we ignore the error and proceed
+fastmcp install claude-code "$TOOL_PY" --python "$ENV_PYTHON" || true
 
 # 2. Run Assessment
 echo "05.7: Starting assessment..." >&2

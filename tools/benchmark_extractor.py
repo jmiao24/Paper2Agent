@@ -56,6 +56,45 @@ def extract_cell_outputs(notebook: Dict[str, Any]) -> Dict[int, str]:
     return outputs
 
 
+def is_plotting_question(question_text: str) -> bool:
+    """
+    Check if the question is about plotting or visualization.
+    Returns True if it contains forbidden keywords.
+    """
+    forbidden_keywords = [
+        "plot",
+        "figure",
+        "graph",
+        "chart",
+        "axis",
+        "axes",
+        "legend",
+        "color",
+        "title",
+        "visualize",
+        "umap",
+        "tsne",
+        "spatial",
+        "heatmap",
+        "dotplot",
+        "violin",
+        "scatter",
+        "histogram",
+        "grid",
+        "subplot",
+    ]
+
+    # Allow "umap" or "tsne" only if asking for coordinates/data, but it's safer to exclude for now
+    # or check context. For now, let's be strict.
+
+    text_lower = question_text.lower()
+    for keyword in forbidden_keywords:
+        # Simple substring check - can be improved with word boundaries if needed
+        if keyword in text_lower:
+            return True
+    return False
+
+
 def validate_question(
     question_data: Dict[str, Any], cell_outputs: Dict[int, str]
 ) -> Dict[str, Any]:
@@ -179,6 +218,13 @@ def main():
     print(f"Validating {len(q_list)} questions...")
 
     for q in q_list:
+        # Check for plotting keywords first
+        if is_plotting_question(q.get("question", "")):
+            print(
+                f"Warning: Question skipped due to plotting keywords: {q.get('question', '')[:100]}..."
+            )
+            continue
+
         validation = validate_question(q, cell_outputs)
         if validation["valid"]:
             valid_questions.append(q)

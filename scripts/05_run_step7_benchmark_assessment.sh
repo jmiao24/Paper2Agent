@@ -62,10 +62,11 @@ fastmcp install claude-code "$TOOL_PY" --python "$ENV_PYTHON" || true
 
 # 2. Run Assessment
 echo "05.7: Starting assessment..." >&2
-python3 "$ASSESSOR_SCRIPT" \
+python3 "$SCRIPT_DIR/tools/benchmark_assessor.py" \
     --input "$INPUT_CSV" \
     --output "$OUTPUT_CSV" \
-    --judge-agent "$JUDGE_AGENT"
+    --judge-agent "$SCRIPT_DIR/agents/benchmark-judge.md" \
+    --agent-def "$SCRIPT_DIR/agents/benchmark-solver.md"
 
 echo "05.7: Assessment complete. Results in $OUTPUT_CSV" >&2
 touch "$MARKER"

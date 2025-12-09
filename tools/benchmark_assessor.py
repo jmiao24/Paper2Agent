@@ -18,7 +18,7 @@ import time
 import json
 import csv
 import logging
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple
 
 # Set up logging
 logging.basicConfig(
@@ -42,7 +42,7 @@ def load_benchmark_csv(csv_path: str) -> List[Dict[str, Any]]:
 
 def run_claude_cli(
     prompt: str, system_prompt: Optional[str] = None, timeout: int = 600
-) -> str:
+) -> Tuple[str, str]:
     """Run the Claude CLI with the given prompt."""
     cmd = [
         "claude",
@@ -71,25 +71,25 @@ def run_claude_cli(
 
         if result.returncode != 0:
             logger.warning(f"Claude CLI failed: {result.stderr}")
-            return f"ERROR: {result.stderr}"
+            return f"ERROR: {result.stderr}", ""
 
         # Parse JSON output
         try:
             output_json = json.loads(result.stdout)
             # Handle list or dict
             if isinstance(output_json, list) and len(output_json) > 0:
-                return output_json[0].get("result", str(output_json))
+                return output_json[0].get("result", str(output_json)), result.stdout
             elif isinstance(output_json, dict):
-                return output_json.get("result", str(output_json))
+                return output_json.get("result", str(output_json)), result.stdout
             else:
-                return result.stdout.strip()
+                return result.stdout.strip(), result.stdout
         except json.JSONDecodeError:
-            return result.stdout.strip()
+            return result.stdout.strip(), result.stdout
 
     except subprocess.TimeoutExpired:
-        return "ERROR: Timeout"
+        return "ERROR: Timeout", ""
     except Exception as e:
-        return f"ERROR: {e}"
+        return f"ERROR: {e}", ""
 
 
 def judge_response(
@@ -109,7 +109,7 @@ Agent Response: {agent_response}
 Return your evaluation in the specified JSON format.
 """
 
-    response_text = run_claude_cli(prompt, system_prompt=judge_agent_def)
+    response_text, _ = run_claude_cli(prompt, system_prompt=judge_agent_def)
 
     # Try to parse JSON from the judge's response
     try:
@@ -143,12 +143,19 @@ def main():
     parser.add_argument(
         "--judge-agent", required=True, help="Path to benchmark-judge.md"
     )
+    parser.add_argument(
+        "--agent-def", required=True, help="Path to benchmark-solver.md"
+    )
 
     args = parser.parse_args()
 
     # Load Judge Agent Definition
     with open(args.judge_agent, "r") as f:
         judge_def = f.read()
+
+    # Load Solver Agent Definition
+    with open(args.agent_def, "r") as f:
+        solver_def = f.read()
 
     questions = load_benchmark_csv(args.input)
     results = []
@@ -161,9 +168,11 @@ def main():
         )
 
         # 1. Run Agent
-        agent_prompt = f"Please answer the following question using the available tools. Be concise.\n\nQuestion: {q['question']}"
+        agent_prompt = f"Please answer the following question using the available tools. Provide your full reasoning, the code you executed, and the final answer.\n\nQuestion: {q['question']}"
         start_time = time.time()
-        agent_response = run_claude_cli(agent_prompt)
+        agent_response, full_agent_response = run_claude_cli(
+            agent_prompt, system_prompt=solver_def
+        )
         duration = time.time() - start_time
 
         # 2. Run Judge
@@ -174,18 +183,16 @@ def main():
         # 3. Record Result
         result_row = q.copy()
         result_row["agent_response"] = agent_response
+        result_row["full_agent_response"] = full_agent_response
         result_row["score"] = judge_result.get("score", 0.0)
         result_row["reasoning"] = judge_result.get("reasoning", "")
         result_row["duration_seconds"] = round(duration, 2)
 
         results.append(result_row)
 
-        # Save intermediate
-        if (i + 1) % 5 == 0:
-            save_results(results, args.output)
+        # Save after each question for incremental progress
+        save_results(results, args.output)
 
-    # Final save
-    save_results(results, args.output)
     logger.info(f"Assessment complete. Results saved to {args.output}")
 
 

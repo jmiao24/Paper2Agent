@@ -111,5 +111,11 @@ for tutorial_name in $tutorial_names; do
         
 done
 
+# Global Review Step
+echo "05.6: Running global benchmark review..."
+python3 "$SCRIPT_DIR/tools/benchmark_reviewer.py" \
+    --input "$OUTPUT_CSV" \
+    --reviewer-agent "$SCRIPT_DIR/agents/benchmark-reviewer.md"
+
 echo "05.6: Benchmark extraction complete. Results in $OUTPUT_CSV" >&2
 touch "$MARKER"

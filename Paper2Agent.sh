@@ -58,7 +58,9 @@ show_elapsed_time() {
 GITHUB_REPO_URL=""
 FOLDER_NAME=""
 TUTORIAL_FILTER=""
+TUTORIAL_FILTER=""
 API_KEY=""
+RUN_BENCHMARK=0
 while [[ $# -gt 0 ]]; do
   case $1 in
     --project_dir)
@@ -77,6 +79,10 @@ while [[ $# -gt 0 ]]; do
       API_KEY="$2"
       shift 2
       ;;
+    --benchmark)
+      RUN_BENCHMARK=1
+      shift 1
+      ;;
     *)
       echo "Unknown parameter: $1" >&2
       exit 1
@@ -94,6 +100,7 @@ if [[ -z "$GITHUB_REPO_URL" || -z "$FOLDER_NAME" ]]; then
   echo "  --tutorials: Optional filter for tutorials (supports natural language descriptions)" >&2
   echo "      Examples: 'data visualization', 'ML tutorial', 'preprocessing.ipynb'" >&2
   echo "  --api: Optional API key for notebook execution and testing" >&2
+  echo "  --benchmark: Optional flag to run benchmark extraction and assessment (default: off)" >&2
   exit 1
 fi
 
@@ -171,6 +178,13 @@ for i in 1 2 3 4 5 6 7; do
     log_progress $((4+i)) "$STEP_NAME" "skip"
     STEP_STATUS["step${i}"]="skipped"
   else
+    # Check if benchmark steps should be skipped
+    if [[ ($i -eq 6 || $i -eq 7) && $RUN_BENCHMARK -eq 0 ]]; then
+        log_progress $((4+i)) "$STEP_NAME" "skip"
+        STEP_STATUS["step${i}"]="skipped (optional)"
+        continue
+    fi
+
     log_progress $((4+i)) "$STEP_NAME" "start"
     case $i in
       1) bash $SCRIPT_DIR/scripts/05_run_step1_setup_env.sh "$SCRIPT_DIR" "$MAIN_DIR" "$repo_name" "$TUTORIAL_FILTER" ;;

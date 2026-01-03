@@ -49,6 +49,8 @@ import { generateCreativeDirectorOutput, CREATIVE_DIRECTOR_AGENT_CARD } from './
 import type { CreativeDirectorRequest } from './creative-director-types.js';
 import { generateVisualInspectorOutput, VISUAL_INSPECTOR_AGENT_CARD } from './visual-inspector.js';
 import type { VisualInspectorRequest } from './visual-inspector-types.js';
+import { generateForensicAnalysis, FORENSIC_ANALYST_AGENT_CARD } from './forensic-analyst.js';
+import type { ForensicAnalystRequest } from './forensic-analyst-types.js';
 
 const server = new Server(
   {
@@ -785,6 +787,112 @@ const tools: Tool[] = [
       required: ['mode', 'dataset_config'],
     },
   },
+  {
+    name: 'analyze_transcript',
+    description: 'The Forensic Analyst v1.0: Neural forensics for LLM transcript analysis using DSMMD taxonomy (Diagnostic and Statistical Manual of Model Disorders). Detects confabulation (110.1), metadata leakage (140.1), genre ruptures (140.3), context collapse (155.2), and split-brain dissociation (SB-1). Generates forensic reports with evidence grading (E1-E4).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        transcript: {
+          type: 'object',
+          properties: {
+            source: {
+              type: 'string',
+              enum: ['text', 'inline'],
+              description: 'Source type: text or inline',
+            },
+            format: {
+              type: 'string',
+              enum: ['json', 'structured', 'plain', 'auto'],
+              description: 'Transcript format (default: auto)',
+              default: 'auto',
+            },
+            content: {
+              type: 'string',
+              description: 'Inline transcript content',
+            },
+          },
+          required: ['source'],
+        },
+        analysis_config: {
+          type: 'object',
+          properties: {
+            detectors: {
+              type: 'array',
+              items: {
+                type: 'string',
+                enum: ['110.1', '140.1', '140.3', '155.2', 'SB-1'],
+              },
+              description: 'Which DSMMD codes to check (default: all)',
+            },
+            min_confidence: {
+              type: 'number',
+              description: 'Minimum confidence threshold (0.0-1.0, default: 0.5)',
+              default: 0.5,
+            },
+            context_window: {
+              type: 'number',
+              description: 'Turns to include around anomalies (default: 3)',
+              default: 3,
+            },
+            enable_clustering: {
+              type: 'boolean',
+              description: 'Group related anomalies (default: true)',
+              default: true,
+            },
+          },
+        },
+        output_config: {
+          type: 'object',
+          properties: {
+            include_notebook: {
+              type: 'boolean',
+              description: 'Generate Google Colab notebook (default: true)',
+              default: true,
+            },
+            include_ascii_report: {
+              type: 'boolean',
+              description: 'Generate text report (default: true)',
+              default: true,
+            },
+            include_timeline: {
+              type: 'boolean',
+              description: 'Generate plotly timeline (default: true)',
+              default: true,
+            },
+            export_format: {
+              type: 'string',
+              enum: ['json', 'csv', 'html'],
+              description: 'Export format for anomaly data',
+            },
+          },
+        },
+        evidence_context: {
+          type: 'object',
+          properties: {
+            specimen_name: {
+              type: 'string',
+              description: 'Name of the specimen (e.g., "Sediment/Juno")',
+            },
+            model_family: {
+              type: 'string',
+              description: 'Model family (e.g., "GPT-4o", "Gemma-2 27B")',
+            },
+            is_production: {
+              type: 'boolean',
+              description: 'Production vs. experimental context',
+            },
+            prior_evidence: {
+              type: 'string',
+              enum: ['E1', 'E2', 'E3', 'E4'],
+              description: 'Existing evidence grade for this specimen',
+            },
+          },
+        },
+      },
+      required: ['transcript'],
+    },
+  },
 ];
 
 /**
@@ -1453,6 +1561,46 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   recommendations: output.recommendations,
                   notebook: output.notebook,
                   usage: 'Upload this notebook to Google Colab to launch interactive FiftyOne visualization',
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
+      case 'analyze_transcript': {
+        if (!args || typeof args !== 'object') {
+          throw new Error('Invalid arguments');
+        }
+        const request = args as unknown as ForensicAnalystRequest;
+
+        const output = generateForensicAnalysis(request);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  success: true,
+                  message: 'Generated neural forensics analysis with DSMMD taxonomy',
+                  agent_card: FORENSIC_ANALYST_AGENT_CARD,
+                  specimen_name: output.specimen_name,
+                  evidence_grade: output.evidence_grade,
+                  transcript_statistics: output.transcript_statistics,
+                  dsmmd_summary: output.dsmmd_summary,
+                  verdict: output.verdict,
+                  anomalies_count: output.anomalies.length,
+                  critical_turns: output.dsmmd_summary.critical_turns,
+                  split_brain_detected: output.dsmmd_summary.by_code['SB-1'] > 0,
+                  insights: output.insights,
+                  recommendations: output.recommendations,
+                  ascii_report: output.ascii_report,
+                  notebook: output.notebook,
+                  timeline_data: output.timeline_data,
+                  usage: 'Upload the notebook to Google Colab for interactive forensic analysis',
                 },
                 null,
                 2

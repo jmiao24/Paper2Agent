@@ -142,7 +142,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node dist/index.js
 
 ## 🎨 Using the Agents
 
-### Available Tools (13 total)
+### Available Tools (14 total)
 
 Once connected to Claude Desktop, you can use these MCP tools:
 
@@ -161,6 +161,7 @@ Once connected to Claude Desktop, you can use these MCP tools:
 | `analyze_swarm_and_suggest` | The Orchestrator | Swarm optimization & ADK workflows |
 | `create_design_system` | The Creative Director | Brand/design system generation |
 | `visualize_dataset` | The Visual Inspector | FiftyOne dataset visualization |
+| `analyze_transcript` | The Forensic Analyst | Neural forensics with DSMMD taxonomy |
 
 ---
 
@@ -257,6 +258,33 @@ Use the generate_ciso_notebook tool to:
   2. Incident response protocols
   3. Cryptography & secrets management
   4. Social engineering defense
+
+---
+
+### Example 6: Forensic Transcript Analysis
+
+**In Claude Desktop:**
+
+```
+Use the analyze_transcript tool with:
+- transcript source: inline
+- content: [Your LLM conversation transcript]
+- specimen_name: "Sediment/Juno"
+- model_family: "GPT-4o"
+- Enable all DSMMD detectors (110.1, 140.1, 140.3, 155.2, SB-1)
+```
+
+**Output:**
+- Google Colab notebook with forensic analysis
+- ASCII report with DSMMD summary:
+  - 110.1: Confabulated Authority (impossible tool claims)
+  - 140.1: Metadata Leakage (serialization artifacts)
+  - 140.3: Genre Rupture (narrative frame breaks)
+  - 155.2: Context Collapse (evaluation awareness)
+  - SB-1: Split-Brain Dissociation (behavior/explanation decoupling)
+- Interactive timeline visualization
+- Forensic verdict with evidence grade (E1-E4)
+- Recommendations for mechanistic investigation
 
 ---
 

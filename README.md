@@ -59,6 +59,7 @@ bash Paper2Agent.sh \
   - Example: `"Preprocessing and clustering"` or tutorial URL
 - `--api <key>`: API key for repositories requiring authentication
   - Example: `your_api_key_here`
+- `--benchmark`: Run benchmark extraction and assessment (default: disabled)
 
 ### Examples
 
@@ -235,6 +236,8 @@ After completion, your project will contain:
 | `reports/coverage/` | Code coverage analysis reports (pytest-cov) |
 | `reports/quality/pylint/` | Code style analysis reports (pylint) |
 | `reports/coverage_and_quality_report.md` | Combined coverage + quality metrics report |
+| `reports/benchmark_questions.csv` | (Optional) Benchmark questions extracted from the executed tutorials (if `--benchmark` used) |
+| `reports/benchmark_results.csv` | (Optional) Benchmark assessment results of the final agent and MCP tools (if `--benchmark` used) |
 
 ## 🎬 Demos
 Below, we showcase demos of AI agents created by Paper2Agent, illustrating how each agent applies the tools from its source paper to tackle scientific tasks.

@@ -99,6 +99,15 @@ bash Paper2Agent.sh \
   --api <ALPHAGENOME_API_KEY>
 ```
 
+#### WFGY Agent for Self-Healing LLM Debugging
+Create a "meta" agent from the [WFGY](https://github.com/onestardao/WFGY) project (MIT licensed) that explains and applies a self-healing LLM framework for debugging other agents or prompts. Source paper: `WFGY_All_Principles_Return_to_One_v1.0_PSBigBig_Public.pdf`.
+
+```bash
+bash Paper2Agent.sh \
+  --project_dir WFGY_Agent \
+  --github_url https://github.com/onestardao/WFGY
+```
+
 ## ⚙️ Installation & Setup
 
 ### Prerequisites
@@ -288,4 +297,3 @@ For comprehensive benchmarking results and evaluation metrics of Paper2Agent, pl
       url={https://arxiv.org/abs/2509.06917}, 
 }
 ```
-

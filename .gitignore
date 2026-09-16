@@ -1,0 +1,17 @@
+# Local operating-system files and Python caches
+.DS_Store
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local environments and runtime credentials
+.venv/
+venv/
+*-env/
+.env
+.env.*
+!.env.example
+!.env.template

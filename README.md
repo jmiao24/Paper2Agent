@@ -5,239 +5,227 @@
 # Paper2Agent: Reimagining Papers As AI Agents
 
 ## 📖 Overview
-`Paper2Agent` is a multi-agent AI system that automatically transforms research papers into interactive AI agents with minimal human input. Here are some [Demos](#-demos) of the Paper2Agent-generated agent.
+`Paper2Agent` is a multi-agent AI system that automatically transforms research papers into interactive AI agents with minimal human input. Explore [demos](#-demos) of Paper2Agent-generated agents, or try it yourself at [paper2agent.ai](https://paper2agent.ai).
 
-## 🚀 Quick Start 
+Paper2Agent coordinates parallel specialist agents to turn scientific papers into reliable MCP servers or skills.
+
+## 🚀 Quick Start
 
 ### Basic Usage
-Automatically detects and runs all relevant tutorials from a research paper’s codebase.
 
-> **⚠️ Prerequisites**: Complete the [installation & setup](#️-installation--setup) below before running Paper2Agent.
->
-> **⏱️ Runtime & Cost**: Processing time varies from 30 minutes to 3+ hours based on codebase complexity. Estimated cost: ~$15 for complex repositories like AlphaGenome using Claude Sonnet 4 (one-time cost).
+Install the [paper2agent skill](#installation), then ask your coding agent to agentify a paper.
 
-```bash
-cd Paper2Agent
+**Claude Code:**
 
-bash Paper2Agent.sh \
-  --project_dir <PROJECT_DIR> \
-  --github_url <GITHUB_URL>
+```text
+/paper2agent Convert <GITHUB_URL> into tested MCP tools in <PROJECT_DIR>.
 ```
+
+**Codex:**
+
+```text
+$paper2agent Convert <GITHUB_URL> into tested MCP tools in <PROJECT_DIR>.
+```
+
+The skill selects useful operations from the repository's APIs, tutorials, examples, and tests. A completed conversion delivers `dist/<repo-name>-mcp.zip` with installation and usage instructions. Processing time and cost depend on the selected scope, dependencies, hardware, and coding-agent model.
 
 ### Advanced Usage
 
-#### Targeted Tutorial Processing
-Process only specific tutorials by title or URL:
+#### Targeted Tasks or Tutorials
 
-```bash
-bash Paper2Agent.sh \
-  --project_dir <PROJECT_DIR> \
-  --github_url <GITHUB_URL> \
-  --tutorials <TUTORIALS_URL or TUTORIALS_TITLE>
+Specify the scientific tasks, tutorial title, or source URL to focus on:
+
+```text
+Use the paper2agent skill to convert <GITHUB_URL> into MCP tools in <PROJECT_DIR>.
+Focus on <TASKS, TUTORIAL_TITLE, or SOURCE_URL>.
 ```
 
 #### Repository with API Key
-For repositories requiring authentication:
 
-```bash
-bash Paper2Agent.sh \
-  --project_dir <PROJECT_DIR> \
-  --github_url <GITHUB_URL> \
-  --api <API_KEY>
+Make credentials available through your host's secret mechanism or process environment, then tell the agent the variable name:
+
+```text
+Use the paper2agent skill to convert <GITHUB_URL> into MCP tools in <PROJECT_DIR>.
+Read the required API key from the environment variable <VARIABLE_NAME>.
 ```
 
-### Parameters
+Credentials stay outside generated code, notebooks, reports, and the delivered ZIP.
 
-**Required:**
-- `--project_dir <directory>`: Name of the project directory to create
-  - Example: `TISSUE_Agent`
-- `--github_url <url>`: GitHub repository URL to analyze
-  - Example: `https://github.com/sunericd/TISSUE`
+### Inputs
 
-**Optional:**
-- `--tutorials <filter>`: Filter tutorials by title or URL
-  - Example: `"Preprocessing and clustering"` or tutorial URL
-- `--api <key>`: API key for repositories requiring authentication
-  - Example: `your_api_key_here`
-- `--benchmark`: Run benchmark extraction and assessment (default: disabled)
+| Input | Description |
+| --- | --- |
+| Repository | GitHub URL or local checkout to convert |
+| Project directory | Where to save the generated server and working artifacts |
+| Scope (optional) | Scientific tasks, tutorial titles, or source URLs to prioritize |
+| Constraints (optional) | Hardware, time, data availability, and runtime credential variable names |
+
+Request [optional extensions](skills/paper2agent/references/extensions.md), such as user-query evaluation or remote deployment, when needed.
 
 ### Examples
 
+The examples below use Claude Code's `/paper2agent` invocation. In Codex, replace it with `$paper2agent`.
+
 #### TISSUE Agent
+
 Create an AI agent from the [TISSUE](https://github.com/sunericd/TISSUE) research paper codebase for uncertainty-calibrated single-cell spatial transcriptomics analysis:
 
-```bash
-bash Paper2Agent.sh \
-  --project_dir TISSUE_Agent \
-  --github_url https://github.com/sunericd/TISSUE
+```text
+/paper2agent Convert https://github.com/sunericd/TISSUE into tested MCP tools in TISSUE_Agent.
 ```
 
 #### Scanpy Agent for Preprocessing and Clustering
+
 Create an AI agent from the [Scanpy](https://github.com/scverse/scanpy) research paper codebase for single-cell analysis preprocessing and clustering:
 
-```bash
-# Filter by tutorial title
-bash Paper2Agent.sh \
-  --project_dir Scanpy_Agent \
-  --github_url https://github.com/scverse/scanpy \
-  --tutorials "Preprocessing and clustering"
+```text
+/paper2agent Convert https://github.com/scverse/scanpy into tested MCP tools in Scanpy_Agent.
+Focus on the "Preprocessing and clustering" tutorial.
+```
 
-# Filter by tutorial URL
-bash Paper2Agent.sh \
-  --project_dir Scanpy_Agent \
-  --github_url https://github.com/scverse/scanpy \
-  --tutorials "https://github.com/scverse/scanpy/blob/main/docs/tutorials/basics/clustering.ipynb"
+You can also provide a tutorial URL:
+
+```text
+/paper2agent Convert https://github.com/scverse/scanpy into tested MCP tools in Scanpy_Agent.
+Focus on https://github.com/scverse/scanpy/blob/main/docs/tutorials/basics/clustering.ipynb.
 ```
 
 #### AlphaGenome Agent
+
 Create an AI agent from the [AlphaGenome](https://github.com/google-deepmind/alphagenome) research paper codebase for genomic data interpretation:
 
-```bash
-bash Paper2Agent.sh \
-  --project_dir AlphaGenome_Agent \
-  --github_url https://github.com/google-deepmind/alphagenome \
-  --api <ALPHAGENOME_API_KEY>
+```text
+/paper2agent Convert https://github.com/google-deepmind/alphagenome into tested MCP tools in AlphaGenome_Agent.
+Read the API key from the environment variable ALPHAGENOME_API_KEY.
 ```
+
+<a id="installation"></a>
 
 ## ⚙️ Installation & Setup
 
 ### Prerequisites
-- **Python**: Version 3.10 or higher
-- **Claude Code**: Install following instructions at [anthropic.com/claude-code](https://www.anthropic.com/claude-code)
+
+- **Coding-agent host:** A host with skill support, shell access, and parallel subagent spawning enabled. The coordinator launches specialists and fresh verifier agents through the host.
+- **Runtime access:** Python and Git, plus any R, native CLI, data, API, or GPU requirements of the selected repository. The skill prepares isolated project environments and records tested versions.
 
 ### Installation Steps
-1. **Clone the Paper2Agent Repository**
+
+1. **Clone the Paper2Agent repository**
+
    ```bash
    git clone https://github.com/jmiao24/Paper2Agent.git
    cd Paper2Agent
    ```
 
-2. **Install Python Dependencies**
+2. **Install the entire skill folder for your host**
+
+   Choose the command for your host. Include `references/`, `scripts/`, and `agents/` along with `SKILL.md`.
+
+   **Claude Code** — personal skill location from the [Claude Code skills documentation](https://code.claude.com/docs/en/skills):
+
    ```bash
-   pip install fastmcp
+   mkdir -p "$HOME/.claude/skills/paper2agent"
+   cp -R skills/paper2agent/. "$HOME/.claude/skills/paper2agent/"
    ```
 
-3. **Install and Configure Claude Code**
+   **Codex** — personal skill location from the [official OpenAI skills documentation](https://learn.chatgpt.com/docs/build-skills):
+
    ```bash
-   npm install -g @anthropic-ai/claude-code
-   claude
+   mkdir -p "$HOME/.agents/skills/paper2agent"
+   cp -R skills/paper2agent/. "$HOME/.agents/skills/paper2agent/"
    ```
+
+3. **Start your coding agent in your analysis workspace**
+
+   Open Claude Code or Codex in the directory where you want to work, then use the [Quick Start](#-quick-start) prompt. If the skill does not appear, restart the coding agent. The skill installs the generated server's dependencies in its project environment during conversion.
+
+### Multi-agent Workflow
+
+1. Prepare the environment and select tools concurrently.
+2. Run selected upstream sources in parallel to obtain reference results.
+3. Implement minimal wrappers in parallel, then launch fresh, separate agents to verify them.
+4. Integrate the verified tools into an MCP server and exercise real MCP calls.
+5. Install and validate the server in a fresh runtime environment.
+6. Package the server and have an independent verifier check installation and tool calls from the extracted ZIP.
+
+See the [skill](skills/paper2agent/SKILL.md) and [orchestration instructions](skills/paper2agent/references/orchestration.md) for the workflow and resume behavior.
 
 ## 🤖 How to Create a Paper Agent?
-To streamline usage, we recommend creating Paper Agents by connecting Paper MCP servers to an AI coding agent, such as [Claude Code](https://www.anthropic.com/claude-code) or the [Google Gemini CLI](https://google-gemini.github.io/gemini-cli/) (it's free with a Google account!).
-We are also actively developing our own base agent, which will be released soon.
 
-### Automatic Launch
-After pipeline completion, Claude Code will automatically open with your new MCP server loaded.
+Connect the generated Paper MCP server to an AI coding agent, such as [Claude Code](https://www.anthropic.com/claude-code), Codex, or the [Google Gemini CLI](https://google-gemini.github.io/gemini-cli/), to use its scientific tools in conversation.
 
-### Manual Launch with Local MCP Server
-To restart your agent later:
+### Connect a Generated Local MCP Server
+
+Extract the delivered ZIP and follow its `USAGE.md` to install dependencies and configure your MCP client. The instructions include the tested interpreter, server entry point, required environment variables, and supported platforms.
+
+To have the coding agent configure the connection, explicitly request it after conversion:
+
+```text
+Connect the generated MCP server to my coding-agent client using its USAGE.md.
+```
+
+### Connect a Remote MCP Server Hosted on Hugging Face
+
+You can also use an existing server from [Connectable Paper MCP Servers](#-connectable-paper-mcp-servers). Open the hosted service's instructions for its MCP endpoint, transport, and authentication requirements.
+
+For an HTTP endpoint in Claude Code, follow the [MCP connection documentation](https://code.claude.com/docs/en/mcp):
+
 ```bash
-cd <working_dir>
-fastmcp install claude-code <project_dir>/src/<repo_name>_mcp.py \
---python <project_dir>/<repo_name>-env/bin/python
+claude mcp add --transport http <MCP_NAME> <MCP_ENDPOINT_URL>
 ```
 
-### Manual Launch with Remote MCP Server Hosted on Hugging Face
-To create a paper agent in Claude Code with the Paper MCP server of interest, use the following script with your own working directory, MCP name, and server URL:
-```bash
-bash launch_remote_mcp.sh \
-  --working_dir <working_dir> \
-  --mcp_name <mcp_name> \
-  --mcp_url <remote_mcp_url>
-```
+For example, the [hosted AlphaGenome MCP server](https://Paper2Agent-alphagenome-mcp.hf.space) can provide tools for genomic data interpretation. Once connected, you can input a query like:
 
-For example, to create an AlphaGenome Agent, run:
-```bash
-bash launch_remote_mcp.sh \
-  --working_dir analysis_dir \
-  --mcp_name alphagenome \
-  --mcp_url https://Paper2Agent-alphagenome-mcp.hf.space
-```
-
-✅ You will now have an **AlphaGenome Agent** ready for genomics data interpretation. You can input the query like:
-```
+```text
 Analyze heart gene expression data with AlphaGenome MCP to identify the causal gene
 for the variant chr11:116837649:T>G, associated with Hypoalphalipoproteinemia.
 ```
 
-To reuse the AlphaGenome agent, run
-
-```bash
-cd analysis_dir
-claude
-```
-
 ### Verification
-Verify your agent is loaded:
+
+In Claude Code, check the server's connection status with:
+
 ```bash
 claude mcp list
 ```
 
-or use `\mcp` inside Claude Code. You should see your repository-specific MCP server listed.
+Or use `/mcp` inside Claude Code. A successful connection should appear in the server list; use a tool call to confirm the scientific workflow works with your inputs. The screenshot below illustrates the original demo connection.
+
 <img width="620" height="247" alt="Screenshot 2025-09-15 at 10 36 00 PM" src="https://github.com/user-attachments/assets/e9bc771f-d223-477c-953b-f30220e37633" />
 
 ## 📁 Output Structure
 
-After completion, your project will contain:
+The final deliverable is **`<project_dir>/dist/<repo-name>-mcp.zip`**. It contains one server project:
 
-```
-<project_dir>/
+```text
+<repo-name>-mcp/
+├── USAGE.md                     # Installation, startup, client setup, and tool reference
 ├── src/
-│   ├── <repo_name>_mcp.py          # Generated MCP server
-│   └── tools/
-│       └── <tutorial_file_name>.py      # Extracted tools from each tutorial
-├── <repo_name>-env/                # Isolated Python environment
-├── repo/
-│   └── <repo_name>/                # Cloned repository with original code
-├── claude_outputs/
-│   ├── step1_output.json           # Tutorial scanner results
-│   ├── step2_output.json           # Tutorial executor results
-│   ├── step3_output.json           # Tool extraction results
-│   ├── step4_output.json           # MCP server creation results
-│   └── step5_output.json           # Coverage and quality analysis results
-├── reports/
-│   ├── tutorial-scanner.json       # Tutorial discovery analysis
-│   ├── tutorial-scanner-include-in-tools.json  # Tools inclusion decisions
-│   ├── executed_notebooks.json     # Notebook execution summary
-│   ├── environment-manager_results.md  # Environment setup details
-│   ├── coverage/                   # Code coverage analysis reports
-│   │   ├── coverage.xml            # XML coverage report (CI/CD format)
-│   │   ├── coverage.json           # JSON coverage report (machine-readable)
-│   │   ├── coverage_summary.txt     # Text summary of coverage metrics
-│   │   ├── coverage_report.md       # Detailed markdown coverage analysis
-│   │   ├── pytest_output.txt       # Full pytest execution output
-│   │   └── htmlcov/                # HTML coverage dashboard (interactive)
-│   ├── quality/                    # Code quality analysis reports
-│   │   └── pylint/                 # Pylint code style analysis
-│   │       ├── pylint_report.txt   # Full pylint analysis output
-│   │       ├── pylint_scores.txt   # Per-file pylint scores summary
-│   │       └── pylint_issues.md    # Detailed style issues breakdown
-│   └── coverage_and_quality_report.md  # Combined coverage + quality report
-├── tests/
-│   ├── code/<tutorial_file_name>/       # Test code for extracted tools
-│   ├── data/<tutorial_file_name>/       # Test data files
-│   ├── results/<tutorial_file_name>/    # Test execution results
-│   └── logs/                       # Test execution logs
-├── notebooks/
-│   └── <tutorial_file_name>/
-│       ├── <tutorial_file_name>_execution_final.ipynb  # Executed tutorial
-│       └── images/                 # Generated plots and visualizations
-└── tools/                          # Additional utility scripts
+│   ├── <repo_name>_mcp.py        # MCP server entry point
+│   ├── requirements.txt         # Pinned Python runtime dependencies
+│   └── tools/                   # Verified tool modules and runtime helpers
+└── ...                          # Required source/native runtime, licenses, and route-specific files
 ```
+
+Exact runtime files depend on the repository. Required scientific code is included or installed from a documented, tested version. R and CLI projects include their runtime restoration or installation instructions. Any external data, models, credentials, or hardware requirements are documented in `USAGE.md`.
 
 ### Key Output Files and Directories
 
+Intermediate artifacts remain in the working project for inspection and resuming work:
+
 | File/Directory | Description |
-|----------------|-------------|
-| `src/<repo_name>_mcp.py` | Main MCP server file that Claude Code loads |
-| `src/tools/<tutorial_file_name>.py` | Individual tool modules extracted from each tutorial |
-| `<repo_name>-env/` | Isolated Python environment with all dependencies |
-| `reports/coverage/` | Code coverage analysis reports (pytest-cov) |
-| `reports/quality/pylint/` | Code style analysis reports (pylint) |
-| `reports/coverage_and_quality_report.md` | Combined coverage + quality metrics report |
-| `reports/benchmark_questions.csv` | (Optional) Benchmark questions extracted from the executed tutorials (if `--benchmark` used) |
-| `reports/benchmark_results.csv` | (Optional) Benchmark assessment results of the final agent and MCP tools (if `--benchmark` used) |
+| --- | --- |
+| `dist/<repo-name>-mcp.zip` | Validated MCP server package to download and use |
+| `src/` | Generated server, tool modules, and runtime requirements |
+| `repo/<repo_name>/` | Original research repository |
+| `<repo_name>-env/` | Isolated Python environment used during conversion |
+| `reports/` | Selection decisions, source provenance, agent records, and validation results |
+| `reports/delivery-validation.json` | Validation of the exact ZIP after extraction at a new location |
+| `tests/` | Scientific checks, fixtures, results, and logs |
+| `notebooks/` | Notebook execution evidence when relevant |
+| `.pipeline/` | Workflow state and completion markers |
+
+The default ZIP contains runtime files and usage instructions. Development artifacts and examples stay in the workspace. Validation covers the delivered tools and documented conditions. See the [output contract](skills/paper2agent/references/output-delivery.md) for packaging and delivery requirements.
 
 ## 🎬 Demos
 Below, we showcase demos of AI agents created by Paper2Agent, illustrating how each agent applies the tools from its source paper to tackle scientific tasks.

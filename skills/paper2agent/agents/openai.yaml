@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper2Agent"
+  short_description: "Convert Python, R, and CLI research code into MCP tools"
+  default_prompt: "Use $paper2agent to convert this research repository into tested MCP tools with parallel specialists and a separate verifier."

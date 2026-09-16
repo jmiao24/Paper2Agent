@@ -15,19 +15,10 @@ Paper2Agent coordinates parallel specialist agents to turn scientific papers int
 
 The simplest way to use Paper2Agent is to ask your coding agent (Claude Code, Codex, etc.) to install the paper2agent skill, then agentify a paper alongside its code repository.
 
-**1. Ask your coding agent to install Paper2Agent:**
-
 ```text
 Read https://github.com/jmiao24/Paper2Agent and install the paper2agent skill
-from skills/paper2agent for this coding agent. Install the entire folder,
-including all subdirectories and supporting files.
-```
+from skills/paper2agent for this coding agent.
 
-If the skill does not appear after installation, restart your coding agent. For manual installation, see [Installation & Setup](#installation).
-
-**2. Ask it to agentify a paper alongside its code repository:**
-
-```text
 Use the paper2agent skill to agentify this paper and its associated files,
 alongside its code repository if available. Follow the skill instructions
 for the workflow, verification, and final delivery.
@@ -35,7 +26,10 @@ for the workflow, verification, and final delivery.
 Paper and associated files: <PAPER_URL_OR_LOCAL_FILES>
 Code repository (if available): <GITHUB_URL_OR_LOCAL_PATH>
 Output directory: <PROJECT_DIR>
+
 ```
+
+If the skill does not appear after installation, restart your coding agent. For manual installation, see [Installation & Setup](#installation).
 
 See the [skill instructions](skills/paper2agent/SKILL.md) for supported inputs, workflows, and deliverables.
 

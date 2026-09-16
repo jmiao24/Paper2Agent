@@ -13,18 +13,39 @@ Paper2Agent coordinates parallel specialist agents to turn scientific papers int
 
 ### Basic Usage
 
-Install the [paper2agent skill](#installation), then ask your coding agent to agentify a paper.
+The simplest way to use Paper2Agent is to ask your coding agent (Claude Code, Codex, etc.) to install the skill, then agentify a paper alongside its code repository.
+
+**1. Ask your coding agent to install Paper2Agent:**
+
+```text
+Read https://github.com/jmiao24/Paper2Agent and install the paper2agent skill
+from skills/paper2agent for this coding agent. Include the entire skill folder
+with its references, scripts, and agents.
+```
+
+If the skill does not appear after installation, restart your coding agent. For manual installation, see [Installation & Setup](#installation).
+
+**2. Ask it to agentify a paper alongside its code repository:**
+
+```text
+Use the paper2agent skill to agentify this paper alongside its code repository.
+Paper: <PAPER_URL_OR_LOCAL_PDF>
+Code repository: <GITHUB_URL_OR_LOCAL_PATH>
+Output directory: <PROJECT_DIR>
+```
+
+You can also invoke the skill explicitly:
 
 **Claude Code:**
 
 ```text
-/paper2agent Convert <GITHUB_URL> into tested MCP tools in <PROJECT_DIR>.
+/paper2agent Agentify <PAPER_URL_OR_LOCAL_PDF> alongside its code repository <GITHUB_URL> in <PROJECT_DIR>.
 ```
 
 **Codex:**
 
 ```text
-$paper2agent Convert <GITHUB_URL> into tested MCP tools in <PROJECT_DIR>.
+$paper2agent Agentify <PAPER_URL_OR_LOCAL_PDF> alongside its code repository <GITHUB_URL> in <PROJECT_DIR>.
 ```
 
 The skill selects useful operations from the repository's APIs, tutorials, examples, and tests. A completed conversion delivers `dist/<repo-name>-mcp.zip` with installation and usage instructions. Processing time and cost depend on the selected scope, dependencies, hardware, and coding-agent model.
@@ -55,6 +76,7 @@ Credentials stay outside generated code, notebooks, reports, and the delivered Z
 
 | Input | Description |
 | --- | --- |
+| Paper (optional) | Paper URL or local PDF to provide scientific context alongside the repository |
 | Repository | GitHub URL or local checkout to convert |
 | Project directory | Where to save the generated server and working artifacts |
 | Scope (optional) | Scientific tasks, tutorial titles, or source URLs to prioritize |
@@ -108,7 +130,9 @@ Read the API key from the environment variable ALPHAGENOME_API_KEY.
 - **Coding-agent host:** A host with skill support, shell access, and parallel subagent spawning enabled. The coordinator launches specialists and fresh verifier agents through the host.
 - **Runtime access:** Python and Git, plus any R, native CLI, data, API, or GPU requirements of the selected repository. The skill prepares isolated project environments and records tested versions.
 
-### Installation Steps
+### Manual Installation Steps
+
+To have your coding agent install the skill, use the [Quick Start](#-quick-start) prompt. To install it yourself, follow the steps below.
 
 1. **Clone the Paper2Agent repository**
 

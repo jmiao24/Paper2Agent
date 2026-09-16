@@ -10,17 +10,14 @@ Bind template values before passing work to specialists:
 
 | Value | Meaning |
 | --- | --- |
-| `PROJECT_ROOT`, `PROJECT_DIR`, `{PROJECT_DIR}` | Absolute output project directory |
-| `REPO_NAME`, `${github_repo_name}`, `<github_repo_name>` | Repository basename without `.git`, retaining case |
-| `UV_PYTHON_ENV`, `<github_repo_name>-env` | Project-owned Python environment |
-| `${tutorial_filter}` | Exact supplied source/tutorial filter or `(none)` |
-| `${language}` | Selected `python`, `r`, or `cli` route |
-| `${tutorial_path}` | Actual selected source path in the repository |
-| `${tutorial_file_name}`, `<tutorial_name>` | Stable snake_case execution ID; pass the owning module ID separately when sources share a tool/module |
-| `SKILL_ROOT`, `${script_dir}` | Absolute skill directory; executable helpers are under `scripts/` |
-| `PROJECT_ENV`, `PROJECT_PYTHON` | Absolute project environment directory and its `bin/python` interpreter |
+| `PROJECT_ROOT` | Absolute output project directory |
+| `REPO_NAME` | Repository basename without `.git`, retaining case |
+| `SKILL_ROOT` | Absolute Paper2MCP skill directory; helpers are under `scripts/` |
+| `PROJECT_ENV`, `PROJECT_PYTHON` | Absolute project environment directory and its interpreter |
 
-Create the requested project and `.pipeline/`; write `project_setup_done` after successful creation/reuse. Place the source at `repo/<github_repo_name>/`. Clone with submodules when required, using a shallow or plain clone if appropriate; inspect incomplete clones before retrying. A local copy/clone must retain its source identity. Verify the requested identity before reusing an existing checkout. An optional `.wiki.git` clone may supply documentation; its absence is nonfatal. Write `source_setup_done` after successful source setup.
+Pass the actual source path, stable execution/module IDs, selected language route, and user filter directly in each assignment. In documentation, `<repo-name>`, `<module>`, and similar angle-bracket terms stand for task-specific values; replace them before running commands.
+
+Create the requested project and `.pipeline/`; write `project_setup_done` after successful creation/reuse. Place the source at `repo/<repo-name>/`. Clone with submodules when required, using a shallow or plain clone if appropriate; inspect incomplete clones before retrying. A local copy/clone must retain its source identity. Verify the requested identity before reusing an existing checkout. An optional `.wiki.git` clone may supply documentation; its absence is nonfatal. Write `source_setup_done` after successful source setup.
 
 Record route/hardware evidence in `.pipeline/language.json`. Create `notebooks/`, `src/tools/`, `tests/{code,data,results,logs,summary}/`, `reports/`, and `tmp/{inputs,outputs}/`; write `workspace_setup_done` when prepared. Run commands from the project root with explicit project interpreters. Generated environments and results stay outside the scientific source tree.
 

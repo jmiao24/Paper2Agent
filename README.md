@@ -19,8 +19,8 @@ The simplest way to use Paper2Agent is to ask your coding agent (Claude Code, Co
 
 ```text
 Read https://github.com/jmiao24/Paper2Agent and install the paper2agent skill
-from skills/paper2agent for this coding agent. Include the entire skill folder
-with its references, scripts, and agents.
+from skills/paper2agent for this coding agent. Install the entire folder,
+including all subdirectories and supporting files.
 ```
 
 If the skill does not appear after installation, restart your coding agent. For manual installation, see [Installation & Setup](#installation).
@@ -28,27 +28,16 @@ If the skill does not appear after installation, restart your coding agent. For 
 **2. Ask it to agentify a paper alongside its code repository:**
 
 ```text
-Use the paper2agent skill to agentify this paper alongside its code repository.
-Paper: <PAPER_URL_OR_LOCAL_PDF>
-Code repository: <GITHUB_URL_OR_LOCAL_PATH>
+Use the paper2agent skill to agentify this paper and its associated files,
+alongside its code repository if available. Follow the skill instructions
+for the workflow, verification, and final delivery.
+
+Paper and associated files: <PAPER_URL_OR_LOCAL_FILES>
+Code repository (if available): <GITHUB_URL_OR_LOCAL_PATH>
 Output directory: <PROJECT_DIR>
 ```
 
-You can also invoke the skill explicitly:
-
-**Claude Code:**
-
-```text
-/paper2agent Agentify <PAPER_URL_OR_LOCAL_PDF> alongside its code repository <GITHUB_URL> in <PROJECT_DIR>.
-```
-
-**Codex:**
-
-```text
-$paper2agent Agentify <PAPER_URL_OR_LOCAL_PDF> alongside its code repository <GITHUB_URL> in <PROJECT_DIR>.
-```
-
-The skill selects useful operations from the repository's APIs, tutorials, examples, and tests. A completed conversion delivers `dist/<repo-name>-mcp.zip` with installation and usage instructions. Processing time and cost depend on the selected scope, dependencies, hardware, and coding-agent model.
+See the [skill instructions](skills/paper2agent/SKILL.md) for supported inputs, workflows, and deliverables.
 
 ### Advanced Usage
 
@@ -71,18 +60,6 @@ Read the required API key from the environment variable <VARIABLE_NAME>.
 ```
 
 Credentials stay outside generated code, notebooks, reports, and the delivered ZIP.
-
-### Inputs
-
-| Input | Description |
-| --- | --- |
-| Paper (optional) | Paper URL or local PDF to provide scientific context alongside the repository |
-| Repository | GitHub URL or local checkout to convert |
-| Project directory | Where to save the generated server and working artifacts |
-| Scope (optional) | Scientific tasks, tutorial titles, or source URLs to prioritize |
-| Constraints (optional) | Hardware, time, data availability, and runtime credential variable names |
-
-Request [optional extensions](skills/paper2agent/references/extensions.md), such as user-query evaluation or remote deployment, when needed.
 
 ### Examples
 
@@ -143,7 +120,7 @@ To have your coding agent install the skill, use the [Quick Start](#-quick-start
 
 2. **Install the entire skill folder for your host**
 
-   Choose the command for your host. Include `references/`, `scripts/`, and `agents/` along with `SKILL.md`.
+   Choose the command for your host. Copy the entire folder, including all subdirectories and supporting files.
 
    **Claude Code** — personal skill location from the [Claude Code skills documentation](https://code.claude.com/docs/en/skills):
 
@@ -162,17 +139,6 @@ To have your coding agent install the skill, use the [Quick Start](#-quick-start
 3. **Start your coding agent in your analysis workspace**
 
    Open Claude Code or Codex in the directory where you want to work, then use the [Quick Start](#-quick-start) prompt. If the skill does not appear, restart the coding agent. The skill installs the generated server's dependencies in its project environment during conversion.
-
-### Multi-agent Workflow
-
-1. Prepare the environment and select tools concurrently.
-2. Run selected upstream sources in parallel to obtain reference results.
-3. Implement minimal wrappers in parallel, then launch fresh, separate agents to verify them.
-4. Integrate the verified tools into an MCP server and exercise real MCP calls.
-5. Install and validate the server in a fresh runtime environment.
-6. Package the server and have an independent verifier check installation and tool calls from the extracted ZIP.
-
-See the [skill](skills/paper2agent/SKILL.md) and [orchestration instructions](skills/paper2agent/references/orchestration.md) for the workflow and resume behavior.
 
 ## 🤖 How to Create a Paper Agent?
 
@@ -216,40 +182,6 @@ claude mcp list
 Or use `/mcp` inside Claude Code. A successful connection should appear in the server list; use a tool call to confirm the scientific workflow works with your inputs. The screenshot below illustrates the original demo connection.
 
 <img width="620" height="247" alt="Screenshot 2025-09-15 at 10 36 00 PM" src="https://github.com/user-attachments/assets/e9bc771f-d223-477c-953b-f30220e37633" />
-
-## 📁 Output Structure
-
-The final deliverable is **`<project_dir>/dist/<repo-name>-mcp.zip`**. It contains one server project:
-
-```text
-<repo-name>-mcp/
-├── USAGE.md                     # Installation, startup, client setup, and tool reference
-├── src/
-│   ├── <repo_name>_mcp.py        # MCP server entry point
-│   ├── requirements.txt         # Pinned Python runtime dependencies
-│   └── tools/                   # Verified tool modules and runtime helpers
-└── ...                          # Required source/native runtime, licenses, and route-specific files
-```
-
-Exact runtime files depend on the repository. Required scientific code is included or installed from a documented, tested version. R and CLI projects include their runtime restoration or installation instructions. Any external data, models, credentials, or hardware requirements are documented in `USAGE.md`.
-
-### Key Output Files and Directories
-
-Intermediate artifacts remain in the working project for inspection and resuming work:
-
-| File/Directory | Description |
-| --- | --- |
-| `dist/<repo-name>-mcp.zip` | Validated MCP server package to download and use |
-| `src/` | Generated server, tool modules, and runtime requirements |
-| `repo/<repo_name>/` | Original research repository |
-| `<repo_name>-env/` | Isolated Python environment used during conversion |
-| `reports/` | Selection decisions, source provenance, agent records, and validation results |
-| `reports/delivery-validation.json` | Validation of the exact ZIP after extraction at a new location |
-| `tests/` | Scientific checks, fixtures, results, and logs |
-| `notebooks/` | Notebook execution evidence when relevant |
-| `.pipeline/` | Workflow state and completion markers |
-
-The default ZIP contains runtime files and usage instructions. Development artifacts and examples stay in the workspace. Validation covers the delivered tools and documented conditions. See the [output contract](skills/paper2agent/references/output-delivery.md) for packaging and delivery requirements.
 
 ## 🎬 Demos
 Below, we showcase demos of AI agents created by Paper2Agent, illustrating how each agent applies the tools from its source paper to tackle scientific tasks.

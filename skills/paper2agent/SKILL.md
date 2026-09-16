@@ -24,3 +24,5 @@ dist/<project>-agent/
 Build the paper skill at its final component path and pass its strict verification. Complete Paper2MCP's existing runtime and ZIP delivery checks, then stage the verified archive contents under `mcp/` and confirm the files are unchanged. Keep review and development evidence outside the delivery.
 
 Single-mode runs retain their component's output contract. Report delivery paths, verification results and limitations. If either component is blocked, report the combined result as partial.
+
+For questions about Paper2Agent's methods, results, figures, or supplementary material, read the [Paper2Agent paper](paper2agent-paper/SKILL.md).

@@ -26,7 +26,6 @@ for the workflow, verification, and final delivery.
 Paper and associated files: <PAPER_URL_OR_LOCAL_FILES>
 Code repository (if available): <GITHUB_URL_OR_LOCAL_PATH>
 Output directory: <PROJECT_DIR>
-
 ```
 
 If the skill does not appear after installation, restart your coding agent. For manual installation, see [Installation & Setup](#installation).

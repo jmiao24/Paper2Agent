@@ -7,13 +7,13 @@
 ## 📖 Overview
 `Paper2Agent` is a multi-agent AI system that automatically transforms research papers into interactive AI agents with minimal human input. Explore [demos](#-demos) of Paper2Agent-generated agents, or try it yourself at [paper2agent.ai](https://paper2agent.ai).
 
-Paper2Agent coordinates parallel specialist agents to turn scientific papers into reliable MCP servers or skills.
+Paper2Agent coordinates parallel specialist agents to turn scientific papers into reliable MCP servers and skills.
 
 ## 🚀 Quick Start
 
 ### Basic Usage
 
-The simplest way to use Paper2Agent is to ask your coding agent (Claude Code, Codex, etc.) to install the skill, then agentify a paper alongside its code repository.
+The simplest way to use Paper2Agent is to ask your coding agent (Claude Code, Codex, etc.) to install the paper2agent skill, then agentify a paper alongside its code repository.
 
 **1. Ask your coding agent to install Paper2Agent:**
 

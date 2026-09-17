@@ -211,18 +211,15 @@ Use Scanpy MCP to preprocess and cluster the single-cell dataset pbmc_all.h5ad.
 * Scanpy: https://Paper2Agent-scanpy-mcp.hf.space
 * TISSUE: https://Paper2Agent-tissue-mcp.hf.space
 
-## 📊 Benchmarking for Paper2Agent
-For comprehensive benchmarking results and evaluation metrics of Paper2Agent, please refer to our dedicated benchmarking repository: [Paper2AgentBench](https://github.com/jmiao24/Paper2AgentBench).
 ## 📚 Citation
 ```
-@misc{miao2025paper2agent,
-      title={Paper2Agent: Reimagining Research Papers As Interactive and Reliable AI Agents}, 
-      author={Jiacheng Miao and Joe R. Davis and Jonathan K. Pritchard and James Zou},
-      year={2025},
-      eprint={2509.06917},
-      archivePrefix={arXiv},
-      primaryClass={cs.AI},
-      url={https://arxiv.org/abs/2509.06917}, 
+@article{miao2026paper2agent,
+  title={Reimagining research papers as interactive and reliable {AI} agents},
+  author={Miao, Jiacheng and Davis, Joe R. and Zhang, Yaohui and Pritchard, Jonathan K. and Zou, James},
+  journal={Nature},
+  year={2026},
+  doi={10.1038/s41586-026-11044-y},
+  url={https://www.nature.com/articles/s41586-026-11044-y}
 }
 ```
 

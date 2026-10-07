@@ -464,7 +464,7 @@ def build(args):
             parts.append(f"[{escape_label(src.stem)}]({filename})")
         (stage / paper_path).write_text("\n\n".join(parts) + "\n", encoding="utf-8")
         (stage / "SKILL.md").write_text(package_skill(plan["name"], title, paper_path), encoding="utf-8")
-        manifest["files"] = {str(p.relative_to(stage)): sha(p) for p in stage.rglob("*") if p.is_file()}
+        manifest["files"] = {p.relative_to(stage).as_posix(): sha(p) for p in stage.rglob("*") if p.is_file()}
         stage.rename(output)
     doc.close()
     write_json(work / "build.json", manifest)

@@ -394,7 +394,7 @@ def build(args):
             write(stage / 'SKILL.md', skill_text(plan, preliminary_status))
             write(stage / 'references/index.md', index_text(plan, docs, assets))
             manifest = {'schema_version': 2, 'layout': 'compact', 'output': str(output), 'settings': settings, 'assets': assets, 'provenance': provenance,
-                        'files': {str(p.relative_to(stage)): pdf.sha(p) for p in stage.rglob('*') if p.is_file()},
+                        'files': {p.relative_to(stage).as_posix(): pdf.sha(p) for p in stage.rglob('*') if p.is_file()},
                         'review_inputs': {name: pdf.sha(work / name) for name in ['bundle.json', 'inventory.json']},
                         'documents': list(reports), 'compact_omissions': compact_omissions}
             # Check generated structure/links before publishing.
@@ -420,7 +420,7 @@ def template_issues(root):
         if not (root / 'assets' / category).is_dir():
             issues.append(f'Missing asset directory: {category}')
     for path in root.rglob('*'):
-        rel = str(path.relative_to(root))
+        rel = path.relative_to(root).as_posix()
         if path.is_symlink():
             issues.append(f'Symlink not allowed in reading package: {rel}')
         if not path.is_file():
@@ -462,7 +462,7 @@ def verify(args, document_reports=None):
     manifest = pdf.read_json(work / 'build.json')
     output = Path(manifest['output'])
     issues, reports, checks = template_issues(output), {}, []
-    if {str(p.relative_to(output)) for p in output.rglob('*') if p.is_file()} != set(manifest['files']):
+    if {p.relative_to(output).as_posix() for p in output.rglob('*') if p.is_file()} != set(manifest['files']):
         issues.append('Output file inventory changed after build')
     for relative, digest in manifest['review_inputs'].items():
         if pdf.sha(work / relative) != digest:

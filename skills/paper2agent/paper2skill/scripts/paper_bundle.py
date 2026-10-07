@@ -446,7 +446,7 @@ def review_aid(args):
             first, last = selected[0]['page'], selected[-1]['page']
             filename = f'pages-{first:04d}-{last:04d}.jpg'
             canvas.save(destination/filename, quality=88, optimize=True)
-            sheet_files.append(str((destination/filename).relative_to(work)))
+            sheet_files.append((destination/filename).relative_to(work).as_posix())
         omissions = reading_package.compact_omission_reasons(states, plan['title'] if source['role'] == 'main' else source['title'])
         items = []
         for state in states:

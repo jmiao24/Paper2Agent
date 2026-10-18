@@ -1,217 +1,224 @@
 <p align="center">
-  <img src="./logo/paper2agent_logo.png" alt="Paper2Agent Logo" width="600px" />
+  <img src="./logo/paper2agent_logo.png" alt="Логотип Paper2Agent" width="600px" />
 </p>
 
-# Paper2Agent: Reimagining Papers As AI Agents
+# Paper2Agent: Переосмысление статей как агентов ИИ
 
-## 📖 Overview
-`Paper2Agent` is a multi-agent AI system that automatically transforms research papers into interactive AI agents with minimal human input. Explore [demos](#-demos) of Paper2Agent-generated agents, or try it yourself at [paper2agent.ai](https://paper2agent.ai).
+## 📖 Обзор
+`Paper2Agent` — это многоагентная ИИ-система, которая автоматически преобразует научные статьи в интерактивные агенты ИИ с минимальным участием человека. Исследуйте [демо](#-демо) агентов, созданных Paper2Agent, или попробуйте сами на [paper2agent.ai](https://paper2agent.ai).
 
-Paper2Agent coordinates parallel specialist agents to turn scientific papers into reliable MCP servers and skills.
+Paper2Agent координирует параллельные специализированные агенты для преобразования научных статей в надёжные MCP-серверы и навыки.
 
-## 🚀 Quick Start
+## 🚀 Быстрый старт
 
-### Basic Usage
+### Основное использование
 
-The simplest way to use Paper2Agent is to ask your coding agent (Claude Code, Codex, etc.) to install the paper2agent skill, then agentify a paper alongside its code repository.
+Самый простой способ использовать Paper2Agent — попросить вашего программирующего агента (Claude Code, Codex и т.п.) установить навык paper2agent, затем агентифицировать статью вместе с её кодовым репозиторием.
 
 ```text
-Read https://github.com/jmiao24/Paper2Agent and install the paper2agent skill
-from skills/paper2agent for this coding agent.
+Прочитайте https://github.com/jmiao24/Paper2Agent и установите навык paper2agent
+из skills/paper2agent для этого программирующего агента.
 
-Use the paper2agent skill to agentify this paper and its associated files,
-alongside its code repository if available. Follow the skill instructions
-for the workflow, verification, and final delivery.
+Используйте навык paper2agent для агентификации этой статьи и её связанных файлов,
+вместе с её кодовым репозиторием, если он доступен. Следуйте инструкциям навыка
+по рабочему процессу, проверке и окончательной поставке.
 
-Paper and associated files: <PAPER_URL_OR_LOCAL_FILES>
-Code repository (if available): <GITHUB_URL_OR_LOCAL_PATH>
-Output directory: <PROJECT_DIR>
+Статья и связанные файлы: <PAPER_URL_OR_LOCAL_FILES>
+Кодовый репозиторий (если доступен): <GITHUB_URL_OR_LOCAL_PATH>
+Каталог вывода: <PROJECT_DIR>
 ```
 
-If the skill does not appear after installation, restart your coding agent. For manual installation, see [Installation & Setup](#installation).
+Если навык не появляется после установки, перезапустите вашего программирующего агента. Для ручной установки см. раздел [Установка и настройка](#installation).
 
-See the [skill instructions](skills/paper2agent/SKILL.md) for supported inputs, workflows, and deliverables.
+Смотрите [инструкции по навыку](skills/paper2agent/SKILL.md) для поддерживаемых входов, рабочих процессов и результатов.
 
-### Advanced Usage
+### Расширенное использование
 
-#### Targeted Tasks or Tutorials
+#### Целевые задачи или обучающие материалы
 
-Specify the scientific tasks, tutorial title, or source URL to focus on:
+Укажите научные задачи, название обучающего материала или исходный URL для фокусировки:
 
 ```text
-Use the paper2agent skill to convert <GITHUB_URL> into MCP tools in <PROJECT_DIR>.
-Focus on <TASKS, TUTORIAL_TITLE, or SOURCE_URL>.
+Используйте навык paper2agent для преобразования <GITHUB_URL> в MCP-инструменты в <PROJECT_DIR>.
+Сосредоточьтесь на <ЗАДАЧАХ, НАЗВАНИИ ОБУЧАЮЩЕГО МАТЕРИАЛА, или ИСХОДНОМ URL>.
 ```
 
-#### Repository with API Key
+#### Репозиторий с API-ключом
 
-Make credentials available through your host's secret mechanism or process environment, then tell the agent the variable name:
+Сделайте учётные данные доступными через механизм секретов вашего хоста или переменные окружения процесса, затем сообщите агенту имя переменной:
 
 ```text
-Use the paper2agent skill to convert <GITHUB_URL> into MCP tools in <PROJECT_DIR>.
-Read the required API key from the environment variable <VARIABLE_NAME>.
+Используйте навык paper2agent для преобразования <GITHUB_URL> в MCP-инструменты в <PROJECT_DIR>.
+Читайте необходимый API-ключ из переменной окружения <ИМЯ_ПЕРЕМЕННОЙ>.
 ```
 
-Credentials stay outside generated code, notebooks, reports, and the delivered ZIP.
+Учётные данные остаются вне генерируемого кода, блокнотов, отчётов и поставляемого ZIP-архива.
 
-### Examples
+### Примеры
 
-The examples below use Claude Code's `/paper2agent` invocation. In Codex, replace it with `$paper2agent`.
+Примеры ниже используют вызов `/paper2agent` в Claude Code. В Codex замените его на `$paper2agent`.
 
-#### TISSUE Agent
+#### Агент TISSUE
 
-Create an AI agent from the [TISSUE](https://github.com/sunericd/TISSUE) research paper codebase for uncertainty-calibrated single-cell spatial transcriptomics analysis:
+Создайте ИИ-агента из кодовой базы исследовательской статьи TISSUE для анализа пространственной транскриптомики единичных клеток с калибровкой неопределённости:
 
 ```text
-/paper2agent Convert https://github.com/sunericd/TISSUE into tested MCP tools in TISSUE_Agent.
+/paper2agent Преобразуйте https://github.com/sunericd/TISSUE в проверенные MCP-инструменты в папке TISSUE_Agent.
 ```
 
-#### Scanpy Agent for Preprocessing and Clustering
+#### Агент Scanpy для предобработки и кластеризации
 
-Create an AI agent from the [Scanpy](https://github.com/scverse/scanpy) research paper codebase for single-cell analysis preprocessing and clustering:
+Создайте ИИ-агента из кодовой базы исследовательской статьи Scanpy для предобработки и кластеризации анализа единичных клеток:
 
 ```text
-/paper2agent Convert https://github.com/scverse/scanpy into tested MCP tools in Scanpy_Agent.
-Focus on the "Preprocessing and clustering" tutorial.
+/paper2agent Преобразуйте https://github.com/scverse/scanpy в проверенные MCP-инструменты в папке Scanpy_Agent.
+Сосредоточьтесь на обучающем материале «Предобработка и кластеризация».
 ```
 
-You can also provide a tutorial URL:
+Вы также можете предоставить URL обучающего материала:
 
 ```text
-/paper2agent Convert https://github.com/scverse/scanpy into tested MCP tools in Scanpy_Agent.
-Focus on https://github.com/scverse/scanpy/blob/main/docs/tutorials/basics/clustering.ipynb.
+/paper2agent Преобразуйте https://github.com/scverse/scanpy в проверенные MCP-инструменты в папке Scanpy_Agent.
+Сосредоточьтесь на https://github.com/scverse/scanpy/blob/main/docs/tutorials/basics/clustering.ipynb.
 ```
 
-#### AlphaGenome Agent
+#### Агент AlphaGenome
 
-Create an AI agent from the [AlphaGenome](https://github.com/google-deepmind/alphagenome) research paper codebase for genomic data interpretation:
+Создайте ИИ-агента из кодовой базы исследовательской статьи AlphaGenome для интерпретации геномных данных:
 
 ```text
-/paper2agent Convert https://github.com/google-deepmind/alphagenome into tested MCP tools in AlphaGenome_Agent.
-Read the API key from the environment variable ALPHAGENOME_API_KEY.
+/paper2agent Преобразуйте https://github.com/google-deepmind/alphagenome в проверенные MCP-инструменты в папке AlphaGenome_Agent.
+Читайте API-ключ из переменной окружения ALPHAGENOME_API_KEY.
 ```
 
 <a id="installation"></a>
 
-## ⚙️ Installation & Setup
+## ⚙️ Установка и настройка
 
-### Prerequisites
+### Предварительные требования
 
-- **Coding-agent host:** A host with skill support, shell access, and parallel subagent spawning enabled. The coordinator launches specialists and fresh verifier agents through the host.
-- **Runtime access:** Python and Git, plus any R, native CLI, data, API, or GPU requirements of the selected repository. The skill prepares isolated project environments and records tested versions.
+- **Хост программирующего агента:**_HOST с поддержкой навыков, доступом к оболочке и возможностью порождения параллельных суб-агентов. Координатор запускает специализированных и свежих верификаторных агентов через хост.
+- **Доступ во время выполнения:** Python и Git, а также любые требования R, нативного CLI, данных, API или GPU выбранного репозитория. Навык готовит изолированные проектные окружения и фиксирует проверенные версии.
 
-### Manual Installation Steps
+### Руководство по ручной установке
 
-To have your coding agent install the skill, use the [Quick Start](#-quick-start) prompt. To install it yourself, follow the steps below.
+Чтобы ваш программирующий агент установил навык, используйте запрос из раздела [Быстрый старт](#-быстрый-старт). Чтобы установить его самостоятельно, выполните следующие шаги.
 
-1. **Clone the Paper2Agent repository**
+1. **Клонируйте репозиторий Paper2Agent**
 
    ```bash
    git clone https://github.com/jmiao24/Paper2Agent.git
    cd Paper2Agent
    ```
 
-2. **Install the entire skill folder for your host**
+2. **Установите всю папку навыка для вашего хоста**
 
-   Choose the command for your host. Copy the entire folder, including all subdirectories and supporting files.
+   Выберите команду для вашего хоста. Скопируйте всю папку, включая все поддиректории и вспомогательные файлы.
 
-   **Claude Code** — personal skill location from the [Claude Code skills documentation](https://code.claude.com/docs/en/skills):
+   **Claude Code** — персональное расположение навыка из [документации по навыкам Claude Code](https://code.claude.com/docs/en/skills):
 
    ```bash
    mkdir -p "$HOME/.claude/skills/paper2agent"
    cp -R skills/paper2agent/. "$HOME/.claude/skills/paper2agent/"
    ```
 
-   **Codex** — personal skill location from the [official OpenAI skills documentation](https://learn.chatgpt.com/docs/build-skills):
+   **Codex** — персональное расположение навыка из [официальной документации по навыкам OpenAI](https://learn.chatgpt.com/docs/build-skills):
 
    ```bash
    mkdir -p "$HOME/.agents/skills/paper2agent"
    cp -R skills/paper2agent/. "$HOME/.agents/skills/paper2agent/"
    ```
 
-3. **Start your coding agent in your analysis workspace**
+3. **Запустите ваш программирующий агент в вашем рабочем пространстве анализа**
 
-   Open Claude Code or Codex in the directory where you want to work, then use the [Quick Start](#-quick-start) prompt. If the skill does not appear, restart the coding agent. The skill installs the generated server's dependencies in its project environment during conversion.
+   Откройте Claude Code или Codex в каталоге, где вы хотите работать, затем используйте запрос из раздела [Быстрый старт](#-быстрый-старт). Если навык не появляется, перезапустите программирующий агент. Навык устанавливает зависимости сгенерированного MCP-сервера в его проектном окружении во время преобразования.
 
-## 🤖 How to Create a Paper Agent?
+## 🤖 Как создать агента статьи?
 
-Connect the generated Paper MCP server to an AI coding agent, such as [Claude Code](https://www.anthropic.com/claude-code), Codex, or the [Google Gemini CLI](https://google-gemini.github.io/gemini-cli/), to use its scientific tools in conversation.
+Подключите сгенерированный MCP-сервер статьи к программирующему агенту ИИ, такому как [Claude Code](https://www.anthropic.com/claude-code), Codex или [Google Gemini CLI](https://google-gemini.github.io/gemini-cli/), чтобы использовать его научные инструменты в диалоге.
 
-### Connect a Generated Local MCP Server
+### Подключение локального MCP-сервера, сгенерированного из статьи
 
-Extract the delivered ZIP and follow its `USAGE.md` to install dependencies and configure your MCP client. The instructions include the tested interpreter, server entry point, required environment variables, and supported platforms.
+Извлеките доставленный ZIP-архив и следуйте инструкциям в его файле `USAGE.md` для установки зависимостей и настройки клиента MCP. В инструкциях указаны проверенный интерпретатор, точка входа сервера, необходимые переменные окружения и поддерживаемые платформы.
 
-To have the coding agent configure the connection, explicitly request it after conversion:
+Чтобы попросить программирующий агент настроить подключение, явно запросите его после преобразования:
 
 ```text
-Connect the generated MCP server to my coding-agent client using its USAGE.md.
+Подключите сгенерированный MCP-сервер к моему клиенту программирующего агента, используя его USAGE.md.
 ```
 
-### Connect a Remote MCP Server Hosted on Hugging Face
+### Подключение удалённого MCP-сервера, размещённого на Hugging Face
 
-You can also use an existing server from [Connectable Paper MCP Servers](#-connectable-paper-mcp-servers). Open the hosted service's instructions for its MCP endpoint, transport, and authentication requirements.
+Вы также можете использовать существующий сервер из [Подключаемых MCP-серверов статей](#-подключаемые-mcp-серверы-статей). Откройте инструкции размещённого сервиса для его конечной точки MCP, транспорта и требований к аутентификации.
 
-For an HTTP endpoint in Claude Code, follow the [MCP connection documentation](https://code.claude.com/docs/en/mcp):
+Для конечной точки HTTP в Claude Code следуйте [документации по подключению MCP](https://code.claude.com/docs/en/mcp):
 
 ```bash
 claude mcp add --transport http <MCP_NAME> <MCP_ENDPOINT_URL>
 ```
 
-For example, the [hosted AlphaGenome MCP server](https://Paper2Agent-alphagenome-mcp.hf.space) can provide tools for genomic data interpretation. Once connected, you can input a query like:
+Например, [размещённый MCP-сервер AlphaGenome](https://Paper2Agent-alphagenome-mcp.hf.space) может предоставлять инструменты для интерпретации геномных данных. После подключения вы можете ввести запрос вида:
 
 ```text
-Analyze heart gene expression data with AlphaGenome MCP to identify the causal gene
-for the variant chr11:116837649:T>G, associated with Hypoalphalipoproteinemia.
+Проанализировать данные экспрессии генов сердца с помощью MCP-сервера AlphaGenome для выявления причинного гена
+для варианта chr11:116837649:T>G, связанного с гипоальфа-липопротеинемией.
 ```
 
-### Verification
+### Проверка
 
-In Claude Code, check the server's connection status with:
+В Claude Code проверьте статус подключения сервера с помощью:
 
 ```bash
 claude mcp list
 ```
 
-Or use `/mcp` inside Claude Code. A successful connection should appear in the server list; use a tool call to confirm the scientific workflow works with your inputs. The screenshot below shows the AlphaGenome MCP server connected in Claude Code.
+Или используйте `/mcp` внутри Claude Code. Успешное подключение должно появиться в списке серверов; используйте вызов инструмента, чтобы подтвердить, что научный рабочий процесс работает с вашими входными данными. На скриншоте ниже показано подключение MCP-сервера AlphaGenome в Claude Code.
 
 <img width="620" alt="Claude Code showing the AlphaGenome MCP server connected" src="assets/claude-code-mcp.png" />
 
-## 🎬 Demos
-Below, we showcase demos of AI agents created by Paper2Agent, illustrating how each agent applies the tools from its source paper to tackle scientific tasks.
-### 🧬 AlphaGenome Agent for Genomic Data Interpretation
-Example query:
+## 🎬 Демонстрации
+
+Ниже мы демонстрируем ИИ-агентов, созданных Paper2Agent, показывая, как каждый агент применяет инструменты из своей исходной статьи для решения научных задач.
+
+### 🧬 Агент AlphaGenome для интерпретации геномных данных
+
+Пример запроса:
 ```
-Analyze heart gene expression data with AlphaGenome MCP to identify the causal gene
-for the variant chr11:116837649:T>G, associated with Hypoalphalipoproteinemia.
+Проанализировать данные экспрессии генов сердца с помощью MCP-сервера AlphaGenome для выявления причинного гена
+для варианта chr11:116837649:T>G, связанного с гипоальфа-липопротеинемией.
 ```
 
 https://github.com/user-attachments/assets/34aad25b-42b3-4feb-b418-db31066e7f7b
 
-### 🗺️ TISSUE Agent for Uncertainty-Aware Spatial Transcriptomics Analysis
-Example query:
-```
-Calculate the 95% prediction interval for the spatial gene expression prediction of gene Acta2 using TISSUE MCP.
+### 🗺️ Агент TISSUE для анализа пространственной транскриптомики с учётом неопределённости
 
-This is my data:
-Spatial count matrix: Spatial_count.txt
-Spatial locations: Locations.txt
-scRNA-seq count matrix: scRNA_count.txt
+Пример запроса:
+```
+Рассчитать 95% интервал предсказания для пространственного предсказания экспрессии гена Acta2 с использованием MCP-сервера TISSUE.
+
+Это мои данные:
+Матрица пространственных подсчётов: Spatial_count.txt
+Пространственные расположения: Locations.txt
+Матрица подсчётов scRNA-seq: scRNA_count.txt
 ```
 
 https://github.com/user-attachments/assets/2c8f6368-fa99-4e6e-b7b5-acc12f741655
 
-### 🧫 Scanpy Agent for Single-Cell Data Preprocessing
-Example query:
+### 🧫 Агент Scanpy для предобработки одноклеточных данных
+
+Пример запроса:
 ```
-Use Scanpy MCP to preprocess and cluster the single-cell dataset pbmc_all.h5ad.
+Используйте MCP-сервер Scanpy для предобработки и кластеризации набора данных pbmc_all.h5ad.
 ```
 
-## 🔗 Connectable Paper MCP Servers
+## 🔗 Подключаемые MCP-серверы статей
+
 * AlphaGenome: https://Paper2Agent-alphagenome-mcp.hf.space
 * Scanpy: https://Paper2Agent-scanpy-mcp.hf.space
 * TISSUE: https://Paper2Agent-tissue-mcp.hf.space
 
-## 📚 Citation
+## 📚 Цитирование
+
 ```
 @article{miao2026paper2agent,
   title={Reimagining research papers as interactive and reliable {AI} agents},
@@ -221,5 +228,3 @@ Use Scanpy MCP to preprocess and cluster the single-cell dataset pbmc_all.h5ad.
   doi={10.1038/s41586-026-11044-y},
   url={https://www.nature.com/articles/s41586-026-11044-y}
 }
-```
-

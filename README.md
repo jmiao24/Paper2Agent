@@ -34,6 +34,19 @@ See the [skill instructions](skills/paper2agent/SKILL.md) for supported inputs, 
 
 ### Advanced Usage
 
+#### Optional Public Paper Source Lookup
+
+If you want to check a paper's publication details before conversion, connect a search MCP server to your coding-agent host. [Optional source lookup](skills/paper2agent/references/source-discovery.md) describes using Parallel's Unified MCP server without a Parallel key, checking the cited pages, and retaining verified links in the paper bundle.
+
+```text
+Use the paper2agent skill to check the publisher version and DOI for
+"A note on two problems in connexion with graphs" using the connected
+Parallel MCP server. Cite the pages supporting the match, distinguish the
+publication record from the supplied file's version, and save the verified
+links in the paper bundle notes before converting my supplied paper files.
+Do not search for or send the contents of local files.
+```
+
 #### Targeted Tasks or Tutorials
 
 Specify the scientific tasks, tutorial title, or source URL to focus on:

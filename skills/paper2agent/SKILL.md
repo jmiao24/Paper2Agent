@@ -5,6 +5,8 @@ description: Convert research papers and associated files, research code, or bot
 
 # Paper2Agent
 
+When the user requests a public paper source lookup before conversion, follow [optional source lookup](references/source-discovery.md). Otherwise use the supplied inputs directly. Lookup is optional and does not replace source review or code verification.
+
 Route by the supplied inputs and requested outcome:
 
 - For paper PDFs and associated files, follow [Paper2Skill](paper2skill/SKILL.md).

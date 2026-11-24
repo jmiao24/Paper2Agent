@@ -95,6 +95,10 @@ Read the API key from the environment variable ALPHAGENOME_API_KEY.
 
 ## ⚙️ Installation & Setup
 
+These steps install the coding-agent skill from this repository. For installation questions
+about the hosted web app's local Runtime Bridge on Windows, see
+[issue #25](https://github.com/jmiao24/Paper2Agent/issues/25).
+
 ### Prerequisites
 
 - **Coding-agent host:** A host with skill support, shell access, and parallel subagent spawning enabled. The coordinator launches specialists and fresh verifier agents through the host.

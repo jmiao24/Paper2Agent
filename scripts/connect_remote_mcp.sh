@@ -58,10 +58,12 @@ done
 
 [[ -n "$working_dir" ]] || fail '--working_dir is required'
 [[ "$mcp_name" =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]] || fail '--mcp_name must start with a letter or digit and contain only letters, digits, underscores, or hyphens'
-[[ "$mcp_url" =~ ^https?://[^[:space:]]+$ ]] || fail '--mcp_url must be a complete HTTP or HTTPS endpoint'
+[[ "$mcp_url" =~ ^https?://[^/?#[:space:]]+([/?#][^[:space:]]*)?$ ]] || fail '--mcp_url must be a complete HTTP or HTTPS endpoint'
 [[ "$transport" == http || "$transport" == sse ]] || fail '--transport must be http or sse'
 command -v claude >/dev/null 2>&1 || fail 'Claude Code is not installed or not on PATH'
 
+# Keep relative workspaces under the caller even if CDPATH is set.
+[[ "$working_dir" == /* ]] || working_dir="./$working_dir"
 mkdir -p -- "$working_dir"
 cd -- "$working_dir"
 claude mcp add --transport "$transport" "$mcp_name" "$mcp_url"
